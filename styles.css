@@ -1,0 +1,183 @@
+/* CDexamSave student monitor and teacher report styles. */
+
+.cdexamsave-monitor-badge {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 1030;
+    padding: .45rem .75rem;
+    border: 1px solid #5f0f0f;
+    border-radius: .35rem;
+    background: #fff;
+    color: #5f0f0f;
+    font-size: .8rem;
+    font-weight: 700;
+    box-shadow: 0 .2rem .6rem rgba(0, 0, 0, .16);
+}
+
+.cdexamsave-warning-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(20, 20, 20, .72);
+}
+
+.cdexamsave-warning-dialog {
+    width: min(34rem, 100%);
+    padding: 2rem;
+    border-top: .4rem solid #960000;
+    border-radius: .5rem;
+    background: #fff;
+    color: #212529;
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, .35);
+}
+
+.cdexamsave-warning-dialog h2 {
+    margin-top: 0;
+    color: #760000;
+}
+
+.cdexamsave-warning-duration {
+    padding: .65rem .8rem;
+    border-left: .25rem solid #960000;
+    background: #f8eded;
+    font-weight: 700;
+}
+
+.cdexamsave-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin: 1rem 0;
+    padding: .85rem 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: .5rem;
+    background: #f8f9fa;
+}
+
+.cdexamsave-toolbar-actions {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+}
+
+.cdexamsave-live-pill,
+.cdexamsave-status {
+    display: inline-block;
+    padding: .25rem .55rem;
+    border-radius: 999px;
+    font-size: .78rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.cdexamsave-live-pill {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.cdexamsave-live-pill::before {
+    display: inline-block;
+    width: .5rem;
+    height: .5rem;
+    margin-right: .35rem;
+    border-radius: 50%;
+    background: #198754;
+    content: '';
+}
+
+.cdexamsave-live-paused {
+    background: #e2e3e5;
+    color: #41464b;
+}
+
+.cdexamsave-live-paused::before {
+    background: #6c757d;
+}
+
+.cdexamsave-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin: 1rem 0 1.5rem;
+}
+
+.cdexamsave-card {
+    min-height: 7rem;
+    padding: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: .5rem;
+    background: #fff;
+    box-shadow: 0 .15rem .5rem rgba(0, 0, 0, .06);
+}
+
+.cdexamsave-card-attention {
+    border-color: #dc3545;
+    background: #fff5f5;
+}
+
+.cdexamsave-card-value,
+.cdexamsave-card-label {
+    display: block;
+}
+
+.cdexamsave-card-value {
+    margin-bottom: .35rem;
+    color: #212529;
+    font-size: 2.15rem;
+    font-weight: 750;
+    line-height: 1;
+}
+
+.cdexamsave-card-label {
+    color: #495057;
+    font-size: .9rem;
+}
+
+.cdexamsave-status-connected {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.cdexamsave-status-attention {
+    background: #f8d7da;
+    color: #842029;
+}
+
+.cdexamsave-status-disconnected {
+    background: #fff3cd;
+    color: #664d03;
+}
+
+.cdexamsave-status-notstarted {
+    background: #e2e3e5;
+    color: #41464b;
+}
+
+.cdexamsave-participant-attention,
+.cdexamsave-incident-active {
+    --table-accent-bg: #fff1f2;
+}
+
+@media (max-width: 767.98px) {
+    .cdexamsave-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .cdexamsave-toolbar-actions .btn {
+        flex: 1 1 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cdexamsave-warning-overlay {
+        scroll-behavior: auto;
+    }
+}
+

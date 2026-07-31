@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use CDexamSave in research or educational practice, please cite this software."
+title: CDexamSave
+type: software
+authors:
+  - family-names: "Díaz Bueno"
+    given-names: "Carlos"
+    affiliation: "Colegio Sagrada Familia – Siervas de San José, Salamanca, Spain"
+    email: "carlosdiazbueno@gmail.com"
+repository-code: "https://github.com/cdiazbu/moodle-quizaccess_cdexamsave"
+license: GPL-3.0-or-later
+version: 1.0.1-rc1
+date-released: 2026-07-31
