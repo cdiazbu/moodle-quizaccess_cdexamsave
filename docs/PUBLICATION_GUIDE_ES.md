@@ -100,7 +100,7 @@ No uses expresiones como «evita copiar», «detecta IA» o «demuestra fraude»
 
 ## Decisión sobre el español
 
-La guía heredada del directorio recomendaba distribuir solo `lang/en` y aportar otras traducciones mediante AMOS después de la aprobación. Como Marketplace acaba de sustituir al directorio, confirma en el formulario actual si mantiene esta regla. Hasta tener confirmación, conserva `lang/es` en el repositorio institucional, pero prepara una variante de envío solo con inglés si el revisor la exige. La documentación española puede permanecer en `docs/`.
+Las directrices vigentes de Marketplace exigen que el paquete inicial distribuya únicamente `lang/en`. La traducción española debe enviarse mediante AMOS después de la aprobación. La documentación española permanece en `docs/` porque esta limitación afecta a los paquetes de idioma de la interfaz, no a la documentación.
 
 ## Referencias oficiales
 

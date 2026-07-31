@@ -40,7 +40,7 @@ No external service, subscription or API key is required. Data remains inside th
 - Configurable retention with scheduled cleanup.
 - Moodle Privacy API provider.
 - Quiz-setting backup and restore; personal monitoring history is deliberately excluded from backups.
-- English and Spanish user interfaces in the distributed institutional package.
+- English interface in the initial Marketplace package; the Spanish translation is prepared for publication through Moodle AMOS after approval.
 
 ## Requirements
 
@@ -109,7 +109,7 @@ GNU General Public License v3 or later.
 - Student return notice.
 - Group-aware live teacher report and CSV export.
 - Retention task, Privacy API, capabilities and quiz-setting backup/restore.
-- English and Spanish institutional interfaces.
+- English Marketplace interface and bilingual English/Spanish documentation.
 - Bilingual administration, publication and privacy documentation.
 
 Publication status: stable initial release for Moodle 4.5. Broader browser, database and Moodle-version claims remain limited to environments actually tested.

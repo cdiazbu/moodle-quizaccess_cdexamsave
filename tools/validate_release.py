@@ -17,7 +17,6 @@ REQUIRED = {
     "db/install.xml",
     "db/access.php",
     "lang/en/quizaccess_cdexamsave.php",
-    "lang/es/quizaccess_cdexamsave.php",
     "amd/src/monitor.js",
     "amd/build/monitor.min.js",
     "amd/src/live_report.js",
@@ -74,11 +73,13 @@ def main() -> int:
             failures.append(f"accidental package file: {path.relative_to(ROOT)}")
 
     enkeys = language_keys(ROOT / "lang/en/quizaccess_cdexamsave.php")
-    eskeys = language_keys(ROOT / "lang/es/quizaccess_cdexamsave.php")
-    for key in sorted(enkeys - eskeys):
-        failures.append(f"Spanish translation missing: {key}")
-    for key in sorted(eskeys - enkeys):
-        failures.append(f"English translation missing: {key}")
+    spanish = ROOT / "lang/es/quizaccess_cdexamsave.php"
+    if spanish.exists():
+        eskeys = language_keys(spanish)
+        for key in sorted(enkeys - eskeys):
+            failures.append(f"Spanish translation missing: {key}")
+        for key in sorted(eskeys - enkeys):
+            failures.append(f"English translation missing: {key}")
 
     referenced: set[str] = set()
     get_string_pattern = re.compile(

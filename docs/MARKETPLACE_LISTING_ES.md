@@ -40,7 +40,7 @@ No requiere servicios externos, suscripciones ni claves API. Los datos permanece
 - Conservación configurable y borrado mediante tarea programada.
 - Implementación de la API de privacidad de Moodle.
 - Copia y restauración de la configuración; el historial personal de supervisión no se incluye en las copias.
-- Interfaz en español e inglés en el paquete institucional distribuido.
+- Interfaz inglesa en el paquete inicial de Marketplace; la traducción española está preparada para publicarse mediante Moodle AMOS después de la aprobación.
 
 ## Requisitos
 
@@ -109,7 +109,7 @@ GNU General Public License v3 o posterior.
 - Aviso al alumno al regresar.
 - Informe docente compatible con grupos y exportación CSV.
 - Tarea de conservación, API de privacidad, permisos y copia/restauración de ajustes.
-- Interfaz institucional en inglés y español.
+- Interfaz inicial de Marketplace en inglés y documentación bilingüe en inglés y español.
 - Documentación bilingüe de administración, publicación y privacidad.
 
 Estado de publicación: versión inicial estable para Moodle 4.5. Las afirmaciones de compatibilidad más amplias se limitarán a los entornos realmente comprobados.
