@@ -103,7 +103,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: amd-build
-          path: plugin/amd/build/
+          path: moodle/mod/quiz/accessrule/cdexamsave/amd/build/
           if-no-files-found: error
 
       - name: PHPUnit
