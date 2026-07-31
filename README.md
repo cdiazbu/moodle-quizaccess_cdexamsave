@@ -49,12 +49,12 @@ Every incident requires contextual human review. Do not apply an automatic acade
 
 ## Requirements
 
-- Moodle 4.0 or later according to `version.php`.
+- Moodle 4.5 or later according to `version.php`.
 - A current browser with JavaScript enabled.
 - Working Moodle cron for scheduled retention cleanup.
 - HTTPS strongly recommended in production.
 
-The initial public release is validated for Moodle 4.5. The compatibility code retains a Moodle 4.0 minimum so existing early installations can upgrade without changing the component name.
+The initial public release targets Moodle 4.5 and later. The technical component name remains unchanged so existing CDexamSave installations on Moodle 4.5 can upgrade without losing their settings or monitoring data.
 
 ## Installation
 

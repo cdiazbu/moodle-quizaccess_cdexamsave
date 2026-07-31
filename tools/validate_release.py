@@ -94,8 +94,8 @@ def main() -> int:
     version = (ROOT / "version.php").read_text(encoding="utf-8")
     if "$plugin->component = 'quizaccess_cdexamsave';" not in version:
         failures.append("version.php component is incorrect")
-    if "$plugin->requires = 2022041900;" not in version:
-        failures.append("Moodle 4.0 minimum version marker is missing")
+    if "$plugin->requires = 2024100700;" not in version:
+        failures.append("Moodle 4.5 minimum version marker is missing")
 
     for module in ("monitor", "live_report"):
         source = ROOT / f"amd/src/{module}.js"

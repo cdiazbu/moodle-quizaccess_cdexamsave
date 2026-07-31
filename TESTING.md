@@ -14,7 +14,7 @@ Run the following on a staging copy of the target Moodle site before enabling a 
 
 | Area | Cases | Expected result |
 |---|---|---|
-| Moodle | 4.0/4.1 legacy rule base; 4.2+ namespaced rule base | Plugin installs, quiz form loads and monitoring initialises |
+| Moodle | 4.5 and later maintained branches | Plugin installs, quiz form loads and monitoring initialises |
 | Browser | Current Edge, Chrome, Firefox and Safari | One incident per focus-loss interval; no duplicate blur/visibility rows |
 | Device | Windows, macOS, ChromeOS, Linux, iPadOS and Android | Supported browser reports focus changes; background suspension recovers on return |
 | Quiz flow | Next page, previous page, flag question, autosave, summary, submit | Normal form submission does not create a persistent false incident |
@@ -30,4 +30,3 @@ Run the following on a staging copy of the target Moodle site before enabling a 
 ## Load test target
 
 For the default three-second report interval, test at least the largest expected simultaneous cohort. Watch database query time, PHP workers and browser network traffic. Increase the refresh interval to five or ten seconds if many teachers will keep several reports open concurrently.
-

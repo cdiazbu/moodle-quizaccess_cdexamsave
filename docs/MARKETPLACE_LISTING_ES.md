@@ -44,7 +44,7 @@ No requiere servicios externos, suscripciones ni claves API. Los datos permanece
 
 ## Requisitos
 
-- Moodle 4.0 o posterior según `version.php`.
+- Moodle 4.5 o posterior según `version.php`.
 - Navegador actual de escritorio o móvil con JavaScript activado.
 - Se recomienda HTTPS para producción.
 - El cron de Moodle debe funcionar para ejecutar la limpieza de datos.

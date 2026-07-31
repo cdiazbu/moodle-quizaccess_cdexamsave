@@ -18,7 +18,7 @@
 ## 1.0.0 — 2026-07-31
 
 - Initial stable release.
-- Moodle 4.0+ compatibility bridge.
+- Initial compatibility bridge, superseded by the Moodle 4.5 minimum used for the Marketplace release.
 - Idempotent focus-loss collector with retry and beacon support.
 - Student incident acknowledgement.
 - Group-aware live teacher report and CSV export.

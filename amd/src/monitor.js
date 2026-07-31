@@ -24,8 +24,8 @@ define([], function() {
         }
         var bytes = new Uint8Array(16);
         window.crypto.getRandomValues(bytes);
-        bytes[6] = (bytes[6] & 0x0f) | 0x40;
-        bytes[8] = (bytes[8] & 0x3f) | 0x80;
+        bytes[6] = (bytes[6] % 16) + 64;
+        bytes[8] = (bytes[8] % 64) + 128;
         return Array.from(bytes, function(byte) {
             return byte.toString(16).padStart(2, '0');
         }).join('').replace(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/, '$1-$2-$3-$4-$5');
@@ -131,6 +131,7 @@ define([], function() {
                 if (!response.ok && response.status >= 500) {
                     throw new Error('Temporary collector error');
                 }
+                return null;
             }).catch(function(error) {
                 if (queueonfailure) {
                     enqueue(payload);
@@ -166,6 +167,7 @@ define([], function() {
             });
             return Promise.all(requests).then(function() {
                 writeQueue(retained);
+                return null;
             });
         }
 
@@ -371,9 +373,12 @@ define([], function() {
             addBadge();
             send(completePayload({action: 'init'}), false, false).catch(function() {
                 // A later heartbeat or incident will initialise the session.
+                return null;
             }).then(function() {
                 attachListeners();
                 return flushQueue();
+            }).catch(function() {
+                return null;
             });
             heartbeattimer = window.setInterval(function() {
                 if (document.visibilityState === 'visible') {

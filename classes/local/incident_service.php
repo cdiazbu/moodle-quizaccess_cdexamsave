@@ -1,5 +1,18 @@
 <?php
 // This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace quizaccess_cdexamsave\local;
 
@@ -56,8 +69,11 @@ class incident_service {
         $course = $DB->get_record('course', ['id' => $quiz->course], '*', MUST_EXIST);
         require_login($course, false, $cm);
 
-        if ((int) $attempt->userid !== (int) $USER->id || !empty($attempt->preview) ||
-                $attempt->state !== 'inprogress') {
+        if (
+            (int) $attempt->userid !== (int) $USER->id ||
+            !empty($attempt->preview) ||
+            $attempt->state !== 'inprogress'
+        ) {
             throw new \moodle_exception('attemptnotmonitorable', 'quizaccess_cdexamsave');
         }
         $duration = min($duration, max(0, time() - (int) $attempt->timestart));
@@ -77,7 +93,7 @@ class incident_service {
                 $session->lostsince = 0;
             }
             $session->pagesessionid = $pagesessionid;
-        } else if ($action === 'lost') {
+        } elseif ($action === 'lost') {
             $event = self::record_loss(
                 $attempt,
                 $pagesessionid,
@@ -92,7 +108,7 @@ class incident_service {
                 $session->focuslost = 1;
                 $session->lostsince = (int) $event->timestart;
             }
-        } else if ($action === 'returned') {
+        } elseif ($action === 'returned') {
             self::record_return(
                 $attempt,
                 $pagesessionid,
@@ -289,8 +305,10 @@ class incident_service {
      * @return void
      */
     private static function assert_event_ownership(\stdClass $event, \stdClass $attempt): void {
-        if ((int) $event->attemptid !== (int) $attempt->id ||
-                (int) $event->userid !== (int) $attempt->userid) {
+        if (
+            (int) $event->attemptid !== (int) $attempt->id ||
+            (int) $event->userid !== (int) $attempt->userid
+        ) {
             throw new \moodle_exception('invalidrequest', 'quizaccess_cdexamsave');
         }
     }

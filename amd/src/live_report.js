@@ -140,7 +140,7 @@ define([], function() {
             incidents.forEach(function(incident) {
                 var key = String(incident.id);
                 if (!firstSnapshot && !knownIncidentIds[key] && window.Notification &&
-                        Notification.permission === 'granted') {
+                        window.Notification.permission === 'granted') {
                     var body = config.strings.notificationBody
                         .replace('{$student}', function() {
                             return incident.fullname;
@@ -148,7 +148,7 @@ define([], function() {
                         .replace('{$reason}', function() {
                             return incident.reasontext;
                         });
-                    var notification = new Notification(config.strings.notificationTitle, {body: body});
+                    var notification = new window.Notification(config.strings.notificationTitle, {body: body});
                     notification.onclick = function() {
                         window.focus();
                         notification.close();
@@ -212,10 +212,12 @@ define([], function() {
                 elements.error.textContent = '';
                 render(data);
                 schedule(config.refreshMs);
+                return null;
             }).catch(function() {
                 elements.error.textContent = config.strings.pollError;
                 elements.error.classList.remove('d-none');
                 schedule(Math.max(config.refreshMs * 2, 5000));
+                return null;
             }).finally(function() {
                 busy = false;
             });
@@ -244,10 +246,15 @@ define([], function() {
                 elements.notifications.classList.add('d-none');
                 return;
             }
-            Notification.requestPermission().then(function(permission) {
+            window.Notification.requestPermission().then(function(permission) {
                 elements.notifications.textContent = permission === 'granted' ?
                     config.strings.notificationsEnabled : config.strings.notificationsDenied;
                 elements.notifications.disabled = true;
+                return null;
+            }).catch(function() {
+                elements.notifications.textContent = config.strings.notificationsDenied;
+                elements.notifications.disabled = true;
+                return null;
             });
         }
 
@@ -260,15 +267,17 @@ define([], function() {
                 paused = false;
                 load().finally(function() {
                     paused = waspaused;
+                }).catch(function() {
+                    return null;
                 });
             });
             elements.pause.addEventListener('click', togglePause);
             if (window.Notification) {
                 elements.notifications.addEventListener('click', enableNotifications);
-                if (Notification.permission === 'granted') {
+                if (window.Notification.permission === 'granted') {
                     elements.notifications.textContent = config.strings.notificationsEnabled;
                     elements.notifications.disabled = true;
-                } else if (Notification.permission === 'denied') {
+                } else if (window.Notification.permission === 'denied') {
                     elements.notifications.textContent = config.strings.notificationsDenied;
                     elements.notifications.disabled = true;
                 }

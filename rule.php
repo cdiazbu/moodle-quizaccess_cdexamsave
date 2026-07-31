@@ -5,12 +5,17 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Quiz access rule implementation for CD ExamFocus.
- *
- * The conditional class declaration keeps the same package compatible with
- * Moodle 4.0/4.1 and with the namespaced access-rule base used by 4.2+.
  *
  * @package    quizaccess_cdexamsave
  * @copyright  2026 Carlos Díaz Bueno
@@ -20,9 +25,9 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Shared implementation for both supported Moodle access-rule base classes.
+ * CD ExamFocus access rule for Moodle quizzes.
  */
-trait quizaccess_cdexamsave_rule_implementation {
+class quizaccess_cdexamsave extends \mod_quiz\local\access_rule_base {
     /**
      * Create the rule only when monitoring is enabled for this quiz.
      *
@@ -96,8 +101,10 @@ trait quizaccess_cdexamsave_rule_implementation {
      */
     public static function validate_settings_form_fields($errors, $data, $files, $quizform) {
         $allowed = [0, 500, 1000, 2000, 3000];
-        if (!empty($data['cdexamsaveenabled']) &&
-                !in_array((int) ($data['cdexamsavegraceperiodms'] ?? -1), $allowed, true)) {
+        if (
+            !empty($data['cdexamsaveenabled']) &&
+            !in_array((int) ($data['cdexamsavegraceperiodms'] ?? -1), $allowed, true)
+        ) {
             $errors['cdexamsavegraceperiodms'] = get_string('invalidgraceperiod', 'quizaccess_cdexamsave');
         }
         return $errors;
@@ -230,24 +237,5 @@ trait quizaccess_cdexamsave_rule_implementation {
             );
         }
         return $messages;
-    }
-}
-
-if (class_exists('\\mod_quiz\\local\\access_rule_base')) {
-    /**
-     * CD ExamFocus rule for Moodle 4.2 and later.
-     */
-    class quizaccess_cdexamsave extends \mod_quiz\local\access_rule_base {
-        use quizaccess_cdexamsave_rule_implementation;
-    }
-} else {
-    global $CFG;
-    require_once($CFG->dirroot . '/mod/quiz/accessrule/accessrulebase.php');
-
-    /**
-     * CD ExamFocus rule for Moodle 4.0 and 4.1.
-     */
-    class quizaccess_cdexamsave extends quiz_access_rule_base {
-        use quizaccess_cdexamsave_rule_implementation;
     }
 }

@@ -44,13 +44,13 @@ No external service, subscription or API key is required. Data remains inside th
 
 ## Requirements
 
-- Moodle 4.0 or later according to `version.php`.
+- Moodle 4.5 or later according to `version.php`.
 - A current desktop or mobile browser with JavaScript enabled.
 - HTTPS is strongly recommended for production use.
 - Moodle cron must run for retention cleanup.
 - No additional Moodle plugin or external service is required.
 
-The initial public release targets Moodle 4.5. The technical minimum remains Moodle 4.0 so existing early installations can upgrade without changing the component name.
+The initial public release targets Moodle 4.5 and later. The technical component name remains unchanged so existing installations on Moodle 4.5 can upgrade without losing their settings or monitoring data.
 
 ## Installation
 

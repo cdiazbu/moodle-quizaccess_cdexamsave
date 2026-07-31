@@ -1,5 +1,18 @@
 <?php
 // This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace quizaccess_cdexamsave\local;
 
@@ -52,11 +65,12 @@ class report_service {
                 SQL_PARAMS_NAMED,
                 'attempt'
             );
-            foreach ($DB->get_records_select(
+            $sessionrecords = $DB->get_records_select(
                 'quizaccess_cdexamsave_sess',
                 "attemptid {$attemptsql}",
                 $attemptparams
-            ) as $session) {
+            );
+            foreach ($sessionrecords as $session) {
                 $sessions[(int) $session->attemptid] = $session;
             }
 
@@ -121,7 +135,7 @@ class report_service {
             ];
         }
 
-        usort($participantrows, static function(array $left, array $right): int {
+        usort($participantrows, static function (array $left, array $right): int {
             $weights = ['attention' => 0, 'disconnected' => 1, 'notstarted' => 2, 'connected' => 3];
             $comparison = $weights[$left['status']] <=> $weights[$right['status']];
             return $comparison ?: strcasecmp($left['fullname'], $right['fullname']);
@@ -257,9 +271,14 @@ class report_service {
 
         if ($groupid > 0) {
             $group = groups_get_group($groupid, 'id,courseid', MUST_EXIST);
-            if ((int) $group->courseid !== (int) $cm->course ||
-                    ($groupmode == SEPARATEGROUPS && !$canaccessallgroups &&
-                    !groups_is_member($groupid, $USER->id))) {
+            if (
+                (int) $group->courseid !== (int) $cm->course ||
+                (
+                    $groupmode == SEPARATEGROUPS &&
+                    !$canaccessallgroups &&
+                    !groups_is_member($groupid, $USER->id)
+                )
+            ) {
                 throw new \moodle_exception('invalidgroup', 'quizaccess_cdexamsave');
             }
             return array_map('intval', array_keys(groups_get_members($groupid, 'u.id')));
