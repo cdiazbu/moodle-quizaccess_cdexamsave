@@ -98,6 +98,11 @@ jobs:
         if: ${{ !cancelled() }}
         run: moodle-plugin-ci grunt --max-lint-warnings 0
 
+      - name: Rebuild AMD with Moodle Grunt
+        if: ${{ !cancelled() && matrix.php == '8.1' && matrix.database == 'pgsql' }}
+        working-directory: moodle
+        run: npx grunt amd --root=mod/quiz/accessrule/cdexamsave
+
       - name: Preserve Moodle-generated AMD build
         if: ${{ !cancelled() && matrix.php == '8.1' && matrix.database == 'pgsql' }}
         uses: actions/upload-artifact@v4
