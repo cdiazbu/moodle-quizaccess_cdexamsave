@@ -11,10 +11,10 @@ use core_privacy\local\request\userlist;
 use core_privacy\local\request\writer;
 
 /**
- * Privacy API implementation for CDexamSave.
+ * Privacy API implementation for CD ExamFocus.
  *
  * @package    quizaccess_cdexamsave
- * @copyright  2026 Carlos Díaz Bueno <carlosdiazbueno@gmail.com>
+ * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements

@@ -7,13 +7,13 @@
 // (at your option) any later version.
 
 /**
- * Quiz access rule implementation for CDexamSave.
+ * Quiz access rule implementation for CD ExamFocus.
  *
  * The conditional class declaration keeps the same package compatible with
  * Moodle 4.0/4.1 and with the namespaced access-rule base used by 4.2+.
  *
  * @package    quizaccess_cdexamsave
- * @copyright  2026 Carlos Díaz Bueno <carlosdiazbueno@gmail.com>
+ * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -40,7 +40,7 @@ trait quizaccess_cdexamsave_rule_implementation {
     }
 
     /**
-     * Add CDexamSave controls to the quiz settings form.
+     * Add CD ExamFocus controls to the quiz settings form.
      *
      * @param mod_quiz_mod_form $quizform Quiz form.
      * @param MoodleQuickForm $mform Moodle form.
@@ -235,7 +235,7 @@ trait quizaccess_cdexamsave_rule_implementation {
 
 if (class_exists('\\mod_quiz\\local\\access_rule_base')) {
     /**
-     * CDexamSave rule for Moodle 4.2 and later.
+     * CD ExamFocus rule for Moodle 4.2 and later.
      */
     class quizaccess_cdexamsave extends \mod_quiz\local\access_rule_base {
         use quizaccess_cdexamsave_rule_implementation;
@@ -245,7 +245,7 @@ if (class_exists('\\mod_quiz\\local\\access_rule_base')) {
     require_once($CFG->dirroot . '/mod/quiz/accessrule/accessrulebase.php');
 
     /**
-     * CDexamSave rule for Moodle 4.0 and 4.1.
+     * CD ExamFocus rule for Moodle 4.0 and 4.1.
      */
     class quizaccess_cdexamsave extends quiz_access_rule_base {
         use quizaccess_cdexamsave_rule_implementation;

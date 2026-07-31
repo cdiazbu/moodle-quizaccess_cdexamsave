@@ -1,10 +1,10 @@
-# CDexamSave screenshot plan
+# CD ExamFocus screenshot plan
 
 Use a dedicated demonstration course with fictional adults such as “Demo Student 01”. Do not use real students, avatars, email addresses, question text, course names, attempt identifiers, URLs containing private hostnames or monitoring exports.
 
 ## Required images
 
-1. **Quiz settings** — CDexamSave section expanded, showing activation, student notice and grace period.
+1. **Quiz settings** — CD ExamFocus section expanded, showing activation, student notice and grace period.
 2. **Student notice** — monitoring badge and return-warning dialog in a fictitious quiz with neutral placeholder questions.
 3. **Teacher live report** — several fictitious attempts illustrating connected, focus lost and disconnected states.
 4. **Incident history** — fictitious closed incidents with durations and signal categories.

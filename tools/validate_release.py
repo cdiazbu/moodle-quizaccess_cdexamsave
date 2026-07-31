@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dependency-free structural validator for a CDexamSave release tree."""
+"""Dependency-free structural validator for a CD ExamFocus release tree."""
 
 from __future__ import annotations
 
@@ -23,8 +23,11 @@ REQUIRED = {
     "amd/src/live_report.js",
     "amd/build/live_report.min.js",
     "classes/privacy/provider.php",
+    "pix/icon.png",
     "README.md",
 }
+
+TEXT_SUFFIXES = {".cff", ".css", ".js", ".json", ".md", ".php", ".py", ".svg", ".xml", ".yml", ".yaml"}
 
 
 def language_keys(path: Path) -> set[str]:
@@ -65,7 +68,7 @@ def main() -> int:
         data = path.read_bytes()
         if data.startswith(b"\xef\xbb\xbf"):
             failures.append(f"UTF-8 BOM is not allowed: {path.relative_to(ROOT)}")
-        if b"\r\n" in data:
+        if path.suffix.lower() in TEXT_SUFFIXES and b"\r\n" in data:
             failures.append(f"CRLF line endings found: {path.relative_to(ROOT)}")
         if path.name in {".DS_Store", "Thumbs.db"} or "__pycache__" in path.parts:
             failures.append(f"accidental package file: {path.relative_to(ROOT)}")
@@ -102,13 +105,13 @@ def main() -> int:
             failures.append(f"compiled AMD file is not an AMD module: {module}")
 
     if failures:
-        print("CDexamSave release validation failed:")
+        print("CD ExamFocus release validation failed:")
         for failure in failures:
             print(f"- {failure}")
         return 1
 
     print(
-        f"CDexamSave release validation passed: {len(all_files)} files, "
+        f"CD ExamFocus release validation passed: {len(all_files)} files, "
         f"{len(enkeys)} language keys."
     )
     return 0

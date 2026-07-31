@@ -1,28 +1,28 @@
-# CDexamSave public release gate
+# CD ExamFocus release evidence checklist
 
-Do not publish while any required item is unchecked. Record date, tester, environment and evidence link for each completed section. Never store real student data in public evidence.
+Use this document to record the evidence behind compatibility and quality claims. An unchecked item must not be described publicly as tested. Record date, tester, environment and evidence link for each completed section, and never store real student data in public evidence.
 
 ## A. Ownership and public metadata
 
-- [x] Real copyright holder replaces “CDexamSave contributors” in every source header.
+- [x] Real copyright holder replaces “CD ExamFocus contributors” in every source header.
 - [x] Maintainer and public support contact are confirmed.
-- [ ] Public repository exists as `moodle-quizaccess_cdexamsave` with plugin files at repository root.
-- [ ] Public issue tracker is enabled.
-- [ ] Documentation URL works without authentication.
-- [ ] GPL v3-or-later licence and intellectual-property authority are confirmed.
-- [ ] No secrets, personal data, generated exports or local configuration files are present.
+- [x] Public repository exists as `moodle-quizaccess_cdexamsave` with plugin files at repository root.
+- [x] Public issue tracker is enabled.
+- [x] Documentation URL works without authentication.
+- [x] GPL v3-or-later licence and intellectual-property authority are confirmed.
+- [x] No secrets, personal data, generated exports or local configuration files are present.
 
 ## B. Static and package checks
 
-- [ ] `tools/validate_release.py` passes.
+- [x] `tools/validate_release.py` passes.
 - [ ] Every PHP file passes `php -l` using a PHP version supported by the target Moodle release.
 - [ ] Moodle Code Checker/PHPCS passes or each remaining warning is reviewed and documented.
 - [ ] Moodle PHPDoc checks pass.
 - [ ] JavaScript source passes linting and built AMD files match source.
 - [ ] XMLDB editor/validation passes.
-- [ ] ZIP has exactly one top-level `cdexamsave/` directory.
+- [x] ZIP has exactly one top-level `cdexamsave/` directory.
 - [ ] ZIP installs without shell commands or external dependency managers.
-- [ ] ZIP contains no development caches, editor files, operating-system files or nested ZIPs.
+- [x] ZIP contains no development caches, editor files, operating-system files or nested ZIPs.
 
 ## C. Moodle 4.5 installation and upgrade
 

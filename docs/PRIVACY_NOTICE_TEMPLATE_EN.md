@@ -1,10 +1,10 @@
-# CDexamSave privacy information template
+# CD ExamFocus privacy information template
 
 This is a drafting aid, not legal advice. The organisation operating Moodle must adapt it with its data protection officer or legal adviser and align it with local law, institutional policy and the actual configuration.
 
 ## Short notice shown before a monitored quiz
 
-This quiz uses CDexamSave focus monitoring. During the attempt, the system records when the quiz tab or window stops being active, when it becomes active again, the duration and the technical connection state. It does not record which website or application was opened and does not capture screen, camera, microphone, keystrokes, clipboard or browsing history. Authorised staff will review incidents in context; an incident is not automatic proof of misconduct. Further information: [PRIVACY INFORMATION URL].
+This quiz uses CD ExamFocus focus monitoring. During the attempt, the system records when the quiz tab or window stops being active, when it becomes active again, the duration and the technical connection state. It does not record which website or application was opened and does not capture screen, camera, microphone, keystrokes, clipboard or browsing history. Authorised staff will review incidents in context; an incident is not automatic proof of misconduct. Further information: [PRIVACY INFORMATION URL].
 
 ## Full information
 
@@ -37,7 +37,7 @@ The plugin does not collect the destination website or application, browsing his
 
 ### Recipients and access
 
-Access is limited to Moodle users assigned the relevant report or export capability, normally authorised teaching, assessment, technical and compliance staff. [ADD PROCESSORS, HOSTING PROVIDERS, PUBLIC AUTHORITIES OR OTHER RECIPIENT CATEGORIES IF APPLICABLE.] CDexamSave itself does not send data to an external service.
+Access is limited to Moodle users assigned the relevant report or export capability, normally authorised teaching, assessment, technical and compliance staff. [ADD PROCESSORS, HOSTING PROVIDERS, PUBLIC AUTHORITIES OR OTHER RECIPIENT CATEGORIES IF APPLICABLE.] CD ExamFocus itself does not send data to an external service.
 
 ### Retention
 
@@ -45,7 +45,7 @@ Completed monitoring records are retained for [NUMBER] days and then deleted by 
 
 ### Decisions and safeguards
 
-CDexamSave does not determine whether misconduct occurred. The organisation will not impose a grade penalty or disciplinary measure solely from a focus record. Authorised staff will consider technical context, duration, recurrence, classroom observations and the student's explanation. [DESCRIBE THE REVIEW/APPEAL PROCESS.]
+CD ExamFocus does not determine whether misconduct occurred. The organisation will not impose a grade penalty or disciplinary measure solely from a focus record. Authorised staff will consider technical context, duration, recurrence, classroom observations and the student's explanation. [DESCRIBE THE REVIEW/APPEAL PROCESS.]
 
 ### Rights
 

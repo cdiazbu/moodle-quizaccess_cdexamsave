@@ -1,10 +1,10 @@
-# Plantilla de información de privacidad de CDexamSave
+# Plantilla de información de privacidad de CD ExamFocus
 
 Esta plantilla es una ayuda de redacción, no asesoramiento jurídico. El responsable del sitio Moodle debe adaptarla con su delegado de protección de datos o asesoría jurídica, la normativa aplicable, su política y la configuración real.
 
 ## Información breve antes del cuestionario
 
-Este cuestionario utiliza la supervisión de foco CDexamSave. Durante el intento se registra cuándo la pestaña o ventana del examen deja de estar activa, cuándo vuelve a activarse, la duración y el estado técnico de la conexión. No se registra qué web o aplicación se abrió ni se capturan pantalla, cámara, micrófono, pulsaciones, portapapeles o historial de navegación. El personal autorizado revisará los incidentes en su contexto; un incidente no constituye automáticamente una prueba de conducta indebida. Información adicional: [URL DE INFORMACIÓN DE PRIVACIDAD].
+Este cuestionario utiliza la supervisión de foco CD ExamFocus. Durante el intento se registra cuándo la pestaña o ventana del examen deja de estar activa, cuándo vuelve a activarse, la duración y el estado técnico de la conexión. No se registra qué web o aplicación se abrió ni se capturan pantalla, cámara, micrófono, pulsaciones, portapapeles o historial de navegación. El personal autorizado revisará los incidentes en su contexto; un incidente no constituye automáticamente una prueba de conducta indebida. Información adicional: [URL DE INFORMACIÓN DE PRIVACIDAD].
 
 ## Información completa
 
@@ -37,7 +37,7 @@ El plugin no obtiene la web o aplicación de destino, historial de navegación, 
 
 ### Destinatarios y acceso
 
-Accederán únicamente usuarios de Moodle con la capacidad de informe o exportación correspondiente, normalmente personal docente, de evaluación, técnico o de cumplimiento autorizado. [AÑADIR ENCARGADOS, ALOJAMIENTO, ADMINISTRACIONES U OTRAS CATEGORÍAS SI PROCEDE.] CDexamSave no transmite datos por sí mismo a servicios externos.
+Accederán únicamente usuarios de Moodle con la capacidad de informe o exportación correspondiente, normalmente personal docente, de evaluación, técnico o de cumplimiento autorizado. [AÑADIR ENCARGADOS, ALOJAMIENTO, ADMINISTRACIONES U OTRAS CATEGORÍAS SI PROCEDE.] CD ExamFocus no transmite datos por sí mismo a servicios externos.
 
 ### Conservación
 
@@ -45,7 +45,7 @@ Los registros finalizados se conservan [NÚMERO] días y después se eliminan me
 
 ### Decisiones y garantías
 
-CDexamSave no decide si hubo conducta indebida. El centro no impondrá una penalización académica o disciplinaria basándose únicamente en un cambio de foco. El personal autorizado valorará contexto técnico, duración, repetición, observación en el aula y explicación del alumno. [DESCRIBIR PROCEDIMIENTO DE REVISIÓN/ALEGACIONES.]
+CD ExamFocus no decide si hubo conducta indebida. El centro no impondrá una penalización académica o disciplinaria basándose únicamente en un cambio de foco. El personal autorizado valorará contexto técnico, duración, repetición, observación en el aula y explicación del alumno. [DESCRIBIR PROCEDIMIENTO DE REVISIÓN/ALEGACIONES.]
 
 ### Derechos
 

@@ -1,6 +1,6 @@
-# Contributing to CDexamSave
+# Contributing to CD ExamFocus
 
-Thank you for helping improve CDexamSave.
+Thank you for helping improve CD ExamFocus.
 
 ## Before opening an issue
 
@@ -9,7 +9,7 @@ Thank you for helping improve CDexamSave.
 - Test with a real student attempt; teacher preview is intentionally excluded.
 - Remove names, email addresses, quiz content, session identifiers and exported monitoring data.
 
-Include Moodle, CDexamSave, PHP, database, browser and operating-system versions; exact steps; expected and actual behaviour; and redacted logs.
+Include Moodle, CD ExamFocus, PHP, database, browser and operating-system versions; exact steps; expected and actual behaviour; and redacted logs.
 
 ## Pull requests
 

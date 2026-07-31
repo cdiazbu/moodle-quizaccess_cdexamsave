@@ -10,7 +10,7 @@ namespace quizaccess_cdexamsave\local;
  * transient network failure without creating duplicate incidents.
  *
  * @package    quizaccess_cdexamsave
- * @copyright  2026 Carlos Díaz Bueno <carlosdiazbueno@gmail.com>
+ * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class incident_service {

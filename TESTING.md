@@ -1,4 +1,4 @@
-# CDexamSave test matrix
+# CD ExamFocus test matrix
 
 ## Automated checks included in the release
 

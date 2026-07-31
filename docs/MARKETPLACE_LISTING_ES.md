@@ -1,10 +1,10 @@
-# CDexamSave — ficha pública en español
+# CD ExamFocus — ficha pública en español
 
 Metadatos preparados para la ficha pública. Los marcadores de las plantillas de privacidad se mantienen por separado porque cada centro debe completarlos según su propio contexto.
 
 ## Nombre del producto
 
-CDexamSave: supervisión del foco en cuestionarios
+CD ExamFocus — Supervisión del foco en cuestionarios Moodle
 
 ## Componente Frankenstyle
 
@@ -12,21 +12,23 @@ CDexamSave: supervisión del foco en cuestionarios
 
 ## Descripción breve
 
-CDexamSave registra cuándo la pestaña o ventana de un cuestionario de Moodle deja de estar activa y ofrece al profesorado autorizado un informe de incidentes casi en tiempo real y compatible con grupos.
+Detecta y documenta cuándo un cuestionario Moodle pierde el foco del navegador, con informe docente en directo y sin cámaras, servicios externos ni suscripciones.
 
 ## Descripción completa
 
-CDexamSave es una regla de acceso para los cuestionarios de Moodle. Cuando se activa en un cuestionario, detecta señales del navegador que indican que un intento en curso ha dejado de ser la pestaña o ventana activa. Agrupa señales solapadas en un único incidente, aplica un margen de tolerancia opcional, avisa al alumno cuando regresa y presenta al profesorado autorizado un informe casi en tiempo real.
+CD ExamFocus es una regla de acceso para los cuestionarios de Moodle. Cuando se activa en un cuestionario, detecta señales del navegador que indican que un intento en curso ha dejado de ser la pestaña o ventana activa. Agrupa señales solapadas en un único incidente, aplica un margen de tolerancia opcional, avisa al alumno cuando regresa y presenta al profesorado autorizado un informe casi en tiempo real.
+
+Abandonar la ventana activa del examen es un indicador relevante de que el alumno puede estar consultando IA u otro recurso externo no autorizado. CD ExamFocus aporta evidencias de esos cambios de foco sin capturar la cámara, grabar la pantalla ni depender de servicios de supervisión de terceros. Un intento sin pérdidas de foco detectadas significa que la ventana supervisada permaneció activa según las señales recibidas del navegador; no garantiza que no se utilizara IA. Pueden quedar fuera de su alcance un segundo dispositivo, un asistente integrado en el navegador, una superposición del sistema operativo, material preparado o la manipulación del cliente.
 
 El informe muestra los intentos activos, el estado actual del foco, la conexión, el número de incidentes, el tiempo total fuera y los incidentes recientes. El personal autorizado puede exportar el historial visible en CSV. Las restricciones de grupos separados y los permisos específicos de consulta y exportación se comprueban en el servidor.
 
-CDexamSave es una ayuda para supervisar y disuadir, no un navegador bloqueado. Un navegador normal no puede impedir el cambio de aplicación, identificar la pestaña o programa de destino, detectar el uso de otro dispositivo ni garantizar que un equipo no gestionado sea inmune a manipulaciones. También pueden producir incidentes legítimos por diálogos del sistema operativo, herramientas de accesibilidad, notificaciones, problemas de conexión o suspensión en segundo plano. Los registros son indicios que requieren revisión humana, no una prueba automática de conducta indebida.
+CD ExamFocus es una ayuda para supervisar y disuadir, no un navegador bloqueado. Un navegador normal no puede impedir el cambio de aplicación, identificar la pestaña o programa de destino, detectar el uso de otro dispositivo ni garantizar que un equipo no gestionado sea inmune a manipulaciones. También pueden producir incidentes legítimos por diálogos del sistema operativo, herramientas de accesibilidad, notificaciones, problemas de conexión o suspensión en segundo plano. Los registros son indicios que requieren revisión humana, no una prueba automática de conducta indebida.
 
 No requiere servicios externos, suscripciones ni claves API. Los datos permanecen en la base de datos del propio sitio Moodle. El plugin no recoge URL de destino, historial de navegación, contenido del portapapeles, pulsaciones, capturas de pantalla, cámara, micrófono ni datos biométricos.
 
 ## Funciones principales
 
-- Activación independiente en cada cuestionario desde **Ajustes del cuestionario > Restricciones extra sobre los intentos > CDexamSave**.
+- Activación independiente en cada cuestionario desde **Ajustes del cuestionario > Restricciones extra sobre los intentos > CD ExamFocus**.
 - Detección mediante las API estándar de visibilidad, foco y ciclo de vida del navegador.
 - Margen configurable para ignorar cambios muy breves.
 - Aviso opcional al alumno después de regresar.
@@ -68,10 +70,10 @@ Los ajustes globales de rendimiento y conservación se encuentran en la configur
 Para supervisar un examen:
 
 1. Edita el cuestionario.
-2. Abre **Restricciones extra sobre los intentos > CDexamSave**.
+2. Abre **Restricciones extra sobre los intentos > CD ExamFocus**.
 3. Activa la supervisión, elige el margen y decide si el alumno debe confirmar el aviso al regresar.
 4. Guarda el cuestionario.
-5. Ábrelo con una cuenta docente autorizada y selecciona **Abrir informe en directo de CDexamSave**.
+5. Ábrelo con una cuenta docente autorizada y selecciona **Abrir informe en directo de CD ExamFocus**.
 6. Comprueba el funcionamiento con otra cuenta de alumno y un intento real. Las vistas previas del profesor no se registran deliberadamente.
 
 ## Privacidad y protección de datos
@@ -87,7 +89,7 @@ Antes de utilizarlo, el centro debería documentar la necesidad y proporcionalid
 - Documentación: https://github.com/cdiazbu/moodle-quizaccess_cdexamsave/blob/main/README.md
 - Autor y responsable del mantenimiento: Carlos Díaz Bueno
 - Afiliación institucional: Colegio Sagrada Familia – Siervas de San José, Salamanca, España
-- Contacto: carlosdiazbueno@gmail.com
+- Soporte: https://github.com/cdiazbu/moodle-quizaccess_cdexamsave/issues
 
 El copyright pertenece a Carlos Díaz Bueno. La afiliación identifica el entorno educativo en el que se desarrolló el plugin y no transfiere por sí sola la titularidad ni la responsabilidad jurídica al colegio.
 
@@ -97,9 +99,12 @@ Al comunicar un problema, indica Moodle, PHP, base de datos, navegador y sistema
 
 GNU General Public License v3 o posterior.
 
-## Novedades — 1.0.1-rc1
+## Novedades — 1.0.2
 
-- Primera candidata a versión pública; todavía no es una versión final de Marketplace.
+- Primera versión estable enviada a Marketplace bajo la marca **CD ExamFocus**.
+- Componente técnico estable `quizaccess_cdexamsave` para conservar la compatibilidad de instalación y actualización.
+- Identidad visual profesional y recursos gráficos para Marketplace.
+- Posicionamiento verificable frente al acceso a IA, sin afirmar una garantía imposible sobre su uso.
 - Registro de pérdidas de foco con margen, reintentos y deduplicación.
 - Aviso al alumno al regresar.
 - Informe docente compatible con grupos y exportación CSV.
@@ -107,4 +112,4 @@ GNU General Public License v3 o posterior.
 - Interfaz institucional en inglés y español.
 - Documentación bilingüe de administración, publicación y privacidad.
 
-Estado de publicación: publicar únicamente después de completar las evidencias de Moodle 4.5 indicadas en `docs/RELEASE_CHECKLIST.md`.
+Estado de publicación: versión inicial estable para Moodle 4.5. Las afirmaciones de compatibilidad más amplias se limitarán a los entornos realmente comprobados.

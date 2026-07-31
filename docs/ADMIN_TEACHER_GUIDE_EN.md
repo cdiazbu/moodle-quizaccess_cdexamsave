@@ -1,8 +1,8 @@
-# CDexamSave administrator and teacher guide
+# CD ExamFocus administrator and teacher guide
 
 ## 1. Purpose and boundary
 
-CDexamSave records browser focus changes during real, in-progress Moodle quiz attempts. It helps staff identify attempts that require review. It does not block other applications, reveal what the student opened or prove misconduct by itself.
+CD ExamFocus records browser focus changes during real, in-progress Moodle quiz attempts. It helps staff identify attempts that require review. It does not block other applications, reveal what the student opened or prove misconduct by itself.
 
 ## 2. Administrator installation
 
@@ -11,7 +11,7 @@ CDexamSave records browser focus changes during real, in-progress Moodle quiz at
 3. Upload the plugin ZIP through **Site administration > Plugins > Install plugins**.
 4. Verify that Moodle detects `quizaccess_cdexamsave` and that the ZIP contains one top-level `cdexamsave` directory.
 5. Complete the database upgrade and purge all caches.
-6. Confirm that the scheduled task **Delete expired CDexamSave monitoring data** is listed and that cron runs.
+6. Confirm that the scheduled task **Delete expired CD ExamFocus monitoring data** is listed and that cron runs.
 7. Review role capabilities:
    - `quizaccess/cdexamsave:viewreport`
    - `quizaccess/cdexamsave:exportreport`
@@ -19,7 +19,7 @@ CDexamSave records browser focus changes during real, in-progress Moodle quiz at
 
 ## 3. Global settings
 
-Review the CDexamSave section in the quiz access-rule settings:
+Review the CD ExamFocus section in the quiz access-rule settings:
 
 - **Retention period:** how long completed monitoring data remains available.
 - **Live report refresh:** teacher dashboard polling interval.
@@ -32,13 +32,13 @@ Start with the defaults. Increase the report refresh interval to five or ten sec
 ## 4. Enable a monitored quiz
 
 1. Open the quiz and select **Edit settings**.
-2. Expand **Extra restrictions on attempts > CDexamSave**.
+2. Expand **Extra restrictions on attempts > CD ExamFocus**.
 3. Set **Enable focus monitoring** to Yes.
 4. Keep **Warn the student after an incident** enabled unless a documented local policy says otherwise.
 5. Choose a grace period. One second is a reasonable starting point; validate it with the devices used by the centre.
 6. Save and display the quiz.
 
-The quiz page should show a focus-monitoring notice. Authorised staff should also see **Open CDexamSave live report**. If needed, the direct path is:
+The quiz page should show a focus-monitoring notice. Authorised staff should also see **Open CD ExamFocus live report**. If needed, the direct path is:
 
 `/mod/quiz/accessrule/cdexamsave/report.php?cmid=COURSE_MODULE_ID`
 
@@ -76,7 +76,7 @@ Repeat on every supported browser/device combination. Keep redacted screenshots 
 
 Never treat one row as automatic evidence of cheating. A focus change can be caused by browser chrome, operating-system dialogs, accessibility software, notifications, battery/connection changes or mobile suspension. The plugin cannot identify the destination tab or application.
 
-Use a documented human-review procedure. Consider pattern, duration, recurrence, question timing, technical context and the student's explanation. Do not create an automatic grade penalty or disciplinary action solely from CDexamSave data.
+Use a documented human-review procedure. Consider pattern, duration, recurrence, question timing, technical context and the student's explanation. Do not create an automatic grade penalty or disciplinary action solely from CD ExamFocus data.
 
 ## 8. Troubleshooting
 

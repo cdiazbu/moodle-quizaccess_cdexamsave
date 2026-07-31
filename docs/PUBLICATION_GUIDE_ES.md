@@ -1,4 +1,4 @@
-# Guía para publicar CDexamSave en Moodle Marketplace
+# Guía para publicar CD ExamFocus en Moodle Marketplace
 
 ## Situación actual
 
@@ -11,7 +11,7 @@ Datos confirmados:
 - Responsable legal y titular del copyright: Carlos Díaz Bueno.
 - Responsable de mantenimiento: Carlos Díaz Bueno.
 - Afiliación institucional: Colegio Sagrada Familia – Siervas de San José, Salamanca.
-- Correo público de soporte: `carlosdiazbueno@gmail.com`.
+- Soporte público: `https://github.com/cdiazbu/moodle-quizaccess_cdexamsave/issues`.
 - Usuario de GitHub: `cdiazbu`.
 - Repositorio: `moodle-quizaccess_cdexamsave`.
 - URL prevista: `https://github.com/cdiazbu/moodle-quizaccess_cdexamsave`.
@@ -38,7 +38,7 @@ Las simulaciones incluidas son útiles, pero no sustituyen esta prueba real.
 2. La raíz del repositorio debe ser la raíz del plugin: `version.php`, `rule.php`, `lang/`, `classes/`, etc. No subas una carpeta contenedora adicional.
 3. Activa GitHub Issues.
 4. Sube `README.md`, `CHANGES.md`, `LICENSE.md`, `SECURITY.md`, `CONTRIBUTING.md`, `TESTING.md` y `docs/`.
-5. Crea una etiqueta firmada o anotada con el número de la versión final solo después de cerrar la prueba. No etiquetes `1.0.1-rc1` como estable.
+5. Crea una etiqueta firmada o anotada `v1.0.2` que apunte exactamente al código estable enviado.
 6. Genera el ZIP desde el contenido de la versión y comprueba que su carpeta superior sea `cdexamsave`.
 7. No incluyas secretos, datos de alumnos, exportaciones, archivos del servidor ni configuraciones locales.
 
@@ -58,7 +58,7 @@ Prepara, como mínimo:
 1. Accede a [Moodle Marketplace](https://marketplace.moodle.com/) con tu cuenta Moodle.
 2. Inicia el proceso para listar un plugin y completa el perfil de proveedor que solicite la interfaz.
 3. Acepta personalmente las condiciones de proveedor y declara correctamente si actúas como persona o entidad.
-4. Introduce los datos fiscales/comerciales únicamente si el portal los requiere. CDexamSave puede plantearse como plugin gratuito y GPL.
+4. Introduce los datos fiscales/comerciales únicamente si el portal los requiere. CD ExamFocus puede plantearse como plugin gratuito y GPL.
 
 La interfaz es nueva y puede cambiar; sigue los nombres reales que muestre Marketplace y la documentación enlazada desde el propio portal.
 
@@ -68,7 +68,7 @@ Usa `docs/MARKETPLACE_LISTING_EN.md` como texto principal. El inglés es impresc
 
 Campos esenciales:
 
-- Nombre: **CDexamSave focus monitoring**.
+- Nombre: **CD ExamFocus focus monitoring**.
 - Componente: `quizaccess_cdexamsave`.
 - Tipo: regla de acceso al cuestionario (`quizaccess`).
 - Precio: gratuito.

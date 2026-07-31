@@ -2,13 +2,13 @@
 // This file is part of Moodle - http://moodle.org/
 
 /**
- * Backup support for per-quiz CDexamSave settings.
+ * Backup support for per-quiz CD ExamFocus settings.
  *
  * Monitoring incidents are intentionally not copied because they belong to
  * specific users and attempts, not to the reusable quiz definition.
  *
  * @package    quizaccess_cdexamsave
- * @copyright  2026 Carlos Díaz Bueno <carlosdiazbueno@gmail.com>
+ * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class backup_quizaccess_cdexamsave_subplugin extends backup_mod_quiz_access_subplugin {

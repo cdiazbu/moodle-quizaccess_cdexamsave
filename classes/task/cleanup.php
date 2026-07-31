@@ -7,7 +7,7 @@ namespace quizaccess_cdexamsave\task;
  * Deletes monitoring data after the configured retention period.
  *
  * @package    quizaccess_cdexamsave
- * @copyright  2026 Carlos Díaz Bueno <carlosdiazbueno@gmail.com>
+ * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class cleanup extends \core\task\scheduled_task {

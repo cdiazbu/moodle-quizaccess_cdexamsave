@@ -1,10 +1,10 @@
-# CDexamSave — Moodle Marketplace listing (English)
+# CD ExamFocus — Moodle Marketplace listing (English)
 
 Publication-ready metadata for the public listing. Privacy-template placeholders are maintained separately because each deploying institution must complete them for its own context.
 
 ## Product name
 
-CDexamSave focus monitoring
+CD ExamFocus — Privacy-first quiz focus monitoring
 
 ## Frankenstyle component
 
@@ -12,21 +12,23 @@ CDexamSave focus monitoring
 
 ## Short description
 
-CDexamSave records when a student's active Moodle quiz tab or window loses focus and provides authorised staff with a near-real-time, group-aware incident report.
+Detect and document when a Moodle quiz loses browser focus, with a live teacher report and no cameras, external service or subscription.
 
 ## Full description
 
-CDexamSave is a quiz access-rule plugin for Moodle. When enabled for a quiz, it detects browser signals indicating that an in-progress attempt is no longer the active tab or window. It consolidates overlapping signals into a single incident, applies an optional grace period, warns the student on return, and shows authorised staff a near-real-time report.
+CD ExamFocus is a quiz access-rule plugin for Moodle. When enabled for a quiz, it detects browser signals indicating that an in-progress attempt is no longer the active tab or window. It consolidates overlapping signals into a single incident, applies an optional grace period, warns the student on return, and shows authorised staff a near-real-time report.
+
+Leaving the active exam window is a relevant indicator that a student may be consulting AI or another unauthorised external resource. CD ExamFocus provides evidence of those focus changes while avoiding camera capture, screen recording and third-party proctoring. A result with no detected focus-loss incidents means that the monitored quiz window remained active according to the browser signals received; it does not guarantee that AI was not used. A second device, an integrated browser assistant, an operating-system overlay, prepared material or client-side interference may remain invisible.
 
 The report displays active attempts, current focus state, connection status, incident count, accumulated time away and recent incident details. Authorised staff can export the visible incident history as CSV. Separate-group restrictions and dedicated report/export capabilities are enforced on the server.
 
-CDexamSave is designed as a monitoring and deterrence aid. It is not a locked browser and must not be represented as one. A standard browser cannot prevent application switching, identify the destination tab or application, detect another device, or make an unmanaged device tamper-proof. Focus incidents may also result from operating-system dialogs, accessibility tools, notifications, connectivity problems or mobile background suspension. Records are indicators for human review, not automatic proof of misconduct.
+CD ExamFocus is designed as a monitoring and deterrence aid. It is not a locked browser and must not be represented as one. A standard browser cannot prevent application switching, identify the destination tab or application, detect another device, or make an unmanaged device tamper-proof. Focus incidents may also result from operating-system dialogs, accessibility tools, notifications, connectivity problems or mobile background suspension. Records are indicators for human review, not automatic proof of misconduct.
 
 No external service, subscription or API key is required. Data remains inside the Moodle site's own database. The plugin does not collect destination URLs, browsing history, clipboard contents, keystrokes, screenshots, camera data, microphone data or biometric data.
 
 ## Main features
 
-- Per-quiz activation under **Quiz settings > Extra restrictions on attempts > CDexamSave**.
+- Per-quiz activation under **Quiz settings > Extra restrictions on attempts > CD ExamFocus**.
 - Detection using standard browser Page Visibility, focus and lifecycle signals.
 - Configurable grace period for very short focus changes.
 - Optional student notice after returning to the quiz.
@@ -48,7 +50,7 @@ No external service, subscription or API key is required. Data remains inside th
 - Moodle cron must run for retention cleanup.
 - No additional Moodle plugin or external service is required.
 
-The first public release must not claim a Moodle version as tested until the release checklist has been completed on that exact version. The initial publication target is Moodle 4.5.
+The initial public release targets Moodle 4.5. The technical minimum remains Moodle 4.0 so existing early installations can upgrade without changing the component name.
 
 ## Installation
 
@@ -68,10 +70,10 @@ Global performance and retention options are available under the quiz access-rul
 To monitor an exam:
 
 1. Edit the quiz.
-2. Open **Extra restrictions on attempts > CDexamSave**.
+2. Open **Extra restrictions on attempts > CD ExamFocus**.
 3. Enable focus monitoring, choose the grace period and decide whether students must acknowledge the return notice.
 4. Save the quiz.
-5. Open the quiz as an authorised teacher and select **Open CDexamSave live report**.
+5. Open the quiz as an authorised teacher and select **Open CD ExamFocus live report**.
 6. Test with a separate student account making a real attempt. Teacher preview attempts are intentionally excluded.
 
 ## Privacy and data protection
@@ -87,7 +89,7 @@ Before deployment, the institution should complete a documented necessity and pr
 - Documentation: https://github.com/cdiazbu/moodle-quizaccess_cdexamsave/blob/main/README.md
 - Author and maintainer: Carlos Díaz Bueno
 - Institutional affiliation: Colegio Sagrada Familia – Siervas de San José, Salamanca, Spain
-- Contact: carlosdiazbueno@gmail.com
+- Support: https://github.com/cdiazbu/moodle-quizaccess_cdexamsave/issues
 
 Copyright is held by Carlos Díaz Bueno. The institutional affiliation identifies the educational setting in which the plugin was developed and does not by itself transfer ownership or legal responsibility to the school.
 
@@ -97,9 +99,12 @@ When reporting a problem, include the Moodle version, PHP version, database engi
 
 GNU General Public License v3 or later.
 
-## Release notes — 1.0.1-rc1
+## Release notes — 1.0.2
 
-- Initial public-release candidate; not yet a final Marketplace release.
+- First stable Marketplace submission under the **CD ExamFocus** public brand.
+- Stable technical component retained as `quizaccess_cdexamsave` for installation and upgrade compatibility.
+- Professional visual identity and Marketplace artwork.
+- Explicit, evidence-based positioning for AI-resource indicators without claiming an AI-use guarantee.
 - Focus-loss collector with grace period, retry and deduplication.
 - Student return notice.
 - Group-aware live teacher report and CSV export.
@@ -107,4 +112,4 @@ GNU General Public License v3 or later.
 - English and Spanish institutional interfaces.
 - Bilingual administration, publication and privacy documentation.
 
-Publication status: release only after the Moodle 4.5 acceptance evidence in `docs/RELEASE_CHECKLIST.md` is complete.
+Publication status: stable initial release for Moodle 4.5. Broader browser, database and Moodle-version claims remain limited to environments actually tested.

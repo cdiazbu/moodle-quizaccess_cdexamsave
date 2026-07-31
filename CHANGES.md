@@ -1,5 +1,14 @@
 # Change log
 
+## 1.0.2 — 2026-07-31
+
+- Introduced the public brand **CD ExamFocus** while retaining the stable `quizaccess_cdexamsave` technical component.
+- Added the final professional icon, plugin artwork and Marketplace assets.
+- Reworked the README and Marketplace messaging around privacy-first focus integrity and external AI-resource indicators.
+- Explicitly documented that a focus record cannot guarantee that AI was not used.
+- Added a bilingual brand guide and a Spanish launch and community-growth plan.
+- Promoted the tested publication build to stable maturity for its first Marketplace submission.
+
 ## 1.0.1-rc1 — 2026-07-31
 
 - Added the bilingual Marketplace publication, administration, privacy and release documentation set.

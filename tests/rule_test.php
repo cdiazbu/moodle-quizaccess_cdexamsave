@@ -7,7 +7,7 @@ namespace quizaccess_cdexamsave;
  * Tests for per-quiz rule configuration.
  *
  * @package    quizaccess_cdexamsave
- * @copyright  2026 Carlos Díaz Bueno <carlosdiazbueno@gmail.com>
+ * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @coversDefaultClass \quizaccess_cdexamsave
  */

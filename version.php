@@ -7,17 +7,17 @@
 // (at your option) any later version.
 
 /**
- * Version information for CDexamSave.
+ * Version information for CD ExamFocus.
  *
  * @package    quizaccess_cdexamsave
- * @copyright  2026 Carlos Díaz Bueno <carlosdiazbueno@gmail.com>
+ * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'quizaccess_cdexamsave';
-$plugin->version = 2026073101;
+$plugin->version = 2026073103;
 $plugin->requires = 2022041900; // Moodle 4.0.
-$plugin->maturity = MATURITY_BETA;
-$plugin->release = '1.0.1-rc1';
+$plugin->maturity = MATURITY_STABLE;
+$plugin->release = '1.0.2';

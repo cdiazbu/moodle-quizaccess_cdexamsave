@@ -5,7 +5,7 @@
  * CSV export of all visible focus-loss incidents for a quiz.
  *
  * @package    quizaccess_cdexamsave
- * @copyright  2026 Carlos Díaz Bueno <carlosdiazbueno@gmail.com>
+ * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -34,7 +34,7 @@ require_capability('quizaccess/cdexamsave:exportreport', $context);
 
 $rows = \quizaccess_cdexamsave\local\report_service::get_export_rows($cm, $groupid);
 $export = new csv_export_writer();
-$export->set_filename(clean_filename('CDexamSave-' . format_string($quiz->name) . '-' . userdate(time(), '%Y%m%d-%H%M')));
+$export->set_filename(clean_filename('CD ExamFocus-' . format_string($quiz->name) . '-' . userdate(time(), '%Y%m%d-%H%M')));
 $export->add_data([
     get_string('export_student', 'quizaccess_cdexamsave'),
     get_string('export_userid', 'quizaccess_cdexamsave'),

@@ -1,127 +1,119 @@
-# CDexamSave
+<p align="center">
+  <img src="docs/assets/cd-examfocus-icon-512.png" alt="CD ExamFocus" width="220">
+</p>
 
-CDexamSave is a quiz access-rule plugin for Moodle 4.0 and later. It detects when an in-progress quiz stops being the active browser tab or window, records every qualifying incident, warns the student on return, and presents authorised staff with a near-real-time report.
+<p align="center">
+  <strong>Know when an active Moodle exam window loses focus.</strong><br>
+  Privacy-first monitoring, live teacher evidence, no cameras and no external service.
+</p>
 
-## Maintainer and affiliation
+# CD ExamFocus
 
-- Author and maintainer: Carlos Díaz Bueno
-- Institutional affiliation: Colegio Sagrada Familia – Siervas de San José, Salamanca, Spain
-- Support: carlosdiazbueno@gmail.com
-- Source: https://github.com/cdiazbu/moodle-quizaccess_cdexamsave
-- Issues: https://github.com/cdiazbu/moodle-quizaccess_cdexamsave/issues
+CD ExamFocus is a Moodle quiz access-rule plugin that detects and documents when an in-progress quiz stops being the active browser tab or window. It warns the student on return and gives authorised staff a near-real-time, group-aware report.
 
-Copyright is held by Carlos Díaz Bueno. The institutional affiliation identifies the educational setting in which the plugin was developed and does not by itself transfer ownership or legal responsibility to the school.
+The public brand is **CD ExamFocus**. The stable technical component remains `quizaccess_cdexamsave` so existing installations, upgrades and data remain compatible.
 
-Compatibility does not replace Moodle security maintenance. Moodle 4.0–4.4 are end-of-life releases; production examination sites should run a currently supported Moodle branch.
+## Why it matters
 
-Technical component: `quizaccess_cdexamsave`  
-Install location: `mod/quiz/accessrule/cdexamsave`  
-Release: 1.0.1-rc1
+AI assistants and online resources are easy to open during an unmanaged browser exam. CD ExamFocus adds a proportionate layer of integrity: it records focus-loss incidents that may indicate access to AI or another unauthorised resource, without using a camera, microphone, screen recording or third-party proctoring service.
 
-## Release status
+The plugin reports what it can actually observe. **No focus-loss incidents detected** means the monitored quiz window remained active according to the browser signals received. It does not guarantee that no AI was used: another device, a browser-integrated assistant, an operating-system overlay, prepared content or client-side interference may remain invisible.
 
-This package is an initial public-release candidate. Its structural validator and browser simulation pass, but publication should wait until the complete acceptance matrix in `TESTING.md` has been run on a real Moodle 4.5 staging site with developer debugging enabled. In particular, verify a real student attempt and the teacher live report; teacher preview attempts are intentionally excluded.
+## At a glance
 
-## Documentation
+- Enable monitoring separately for each quiz.
+- Detect hidden tabs, lost window focus and relevant page lifecycle events.
+- Merge overlapping signals and ignore very brief changes with a configurable grace period.
+- Notify the student after returning to the exam.
+- Follow active attempts in a teacher report refreshed every 2–30 seconds.
+- See focus state, connection state, incident count and accumulated time away.
+- Receive optional native browser notifications for new incidents.
+- Export the permitted incident history to CSV.
+- Respect Moodle capabilities and separate groups on the server.
+- Keep all monitoring data inside the Moodle site's own database.
+- Apply configurable retention through Moodle cron and support the Privacy API.
+- Require no API key, subscription or external dependency.
 
-- `docs/MARKETPLACE_LISTING_EN.md`: English text ready for the public listing.
-- `docs/MARKETPLACE_LISTING_ES.md`: Spanish public-listing text.
-- `docs/ADMIN_TEACHER_GUIDE_EN.md`: administrator and teacher guide in English.
-- `docs/GUIA_ADMIN_PROFESORADO_ES.md`: administrator and teacher guide in Spanish.
-- `docs/PRIVACY_NOTICE_TEMPLATE_EN.md`: editable privacy-information template.
-- `docs/PLANTILLA_INFORMACION_PRIVACIDAD_ES.md`: editable Spanish privacy-information template.
-- `docs/PUBLICATION_GUIDE_ES.md`: step-by-step publication guide.
-- `docs/RELEASE_CHECKLIST.md`: technical release gate and evidence checklist.
-- `docs/SCREENSHOT_PLAN.md`: required screenshots and privacy precautions.
+## What CD ExamFocus does not do
 
-## What it provides
+CD ExamFocus is a monitoring and deterrence aid, not a locked browser or automatic misconduct detector.
 
-- Per-quiz activation in **Quiz settings > Extra restrictions on attempts > CDexamSave**.
-- Detection through the standard Page Visibility, Focus and Page Lifecycle browser APIs.
-- Configurable grace period to suppress very short accidental focus changes.
-- A clear student acknowledgement when focus returns.
-- Teacher report refreshed every 2–30 seconds, with active attempts prioritised by risk state.
-- Optional native browser alerts for new incidents while the teacher keeps the report open.
-- Connection heartbeats, stale-connection detection and live incident duration.
-- Group-aware access that respects Moodle separate-groups rules.
-- CSV export of the complete visible incident history.
-- Idempotent writes, retry queue and beacon transport for page lifecycle events.
-- Dedicated Moodle capabilities, scheduled retention cleanup, backup/restore of quiz settings and a complete Privacy API provider.
-- Spanish and English interfaces.
+- It cannot prevent Alt+Tab or application switching.
+- It cannot identify the destination tab, application or website.
+- It cannot detect another device.
+- It cannot guarantee that AI was not used.
+- It cannot make an unmanaged browser tamper-proof.
+- Legitimate operating-system dialogs, accessibility tools, notifications or connection problems can create incidents.
+
+Every incident requires contextual human review. Do not apply an automatic academic or disciplinary penalty from this record alone.
+
+## Requirements
+
+- Moodle 4.0 or later according to `version.php`.
+- A current browser with JavaScript enabled.
+- Working Moodle cron for scheduled retention cleanup.
+- HTTPS strongly recommended in production.
+
+The initial public release is validated for Moodle 4.5. The compatibility code retains a Moodle 4.0 minimum so existing early installations can upgrade without changing the component name.
 
 ## Installation
 
 ### Moodle web installer
 
-1. Sign in as a site administrator.
+1. Back up the site and test on a staging copy.
 2. Open **Site administration > Plugins > Install plugins**.
-3. Upload the ZIP whose top-level folder is `cdexamsave`.
-4. Confirm the detected component `quizaccess_cdexamsave` and complete the database upgrade.
-5. Purge Moodle caches once installation is complete.
-6. Confirm that Moodle cron runs normally; retention cleanup depends on it.
+3. Upload the release ZIP; its single top-level directory must be `cdexamsave`.
+4. Confirm the component `quizaccess_cdexamsave` and complete the database upgrade.
+5. Purge Moodle caches.
+6. Confirm that Moodle cron runs normally.
 
 ### Server installation
 
-1. Copy the `cdexamsave` directory to `mod/quiz/accessrule/`.
-2. Ensure the web-server account has the same ownership and permissions as other Moodle plugins.
-3. Visit **Site administration > Notifications** and complete the upgrade.
-4. Purge caches.
+Copy `cdexamsave` to `mod/quiz/accessrule/`, visit **Site administration > Notifications**, complete the upgrade and purge caches. No Moodle core file is modified.
 
-No core Moodle file is changed.
+## Configure and use
 
-## Configuration
+Global limits are under **Site administration > Plugins > Activity modules > Quiz > Quiz access rules > CD ExamFocus**. The defaults are:
 
-Global limits are under **Site administration > Plugins > Activity modules > Quiz > Quiz access rules > CDexamSave**:
-
-- data retention: 180 days by default;
+- data retention: 180 days;
 - teacher report refresh: 3 seconds;
 - student heartbeat: 10 seconds;
 - disconnected threshold: 35 seconds;
 - maximum incidents per attempt: 2,000.
 
-To enable a specific exam, edit the quiz and activate **Enable focus monitoring** in the CDexamSave section. Choose whether the student must acknowledge incidents and select the grace period.
+For a specific exam:
 
-The live-report link appears in the quiz access information for teachers who have `quizaccess/cdexamsave:viewreport`. The CSV button additionally requires `quizaccess/cdexamsave:exportreport`.
+1. Edit the quiz.
+2. Open **Extra restrictions on attempts > CD ExamFocus**.
+3. Enable focus monitoring.
+4. Select the grace period and whether the student must acknowledge the return notice.
+5. Save the quiz.
+6. Open **CD ExamFocus live report** as an authorised teacher.
+7. Test with a separate student account making a real attempt. Teacher preview attempts are intentionally excluded.
 
-## How detection works
+The report requires `quizaccess/cdexamsave:viewreport`. CSV export additionally requires `quizaccess/cdexamsave:exportreport`.
 
-The browser emits a loss signal when the quiz tab becomes hidden, the window loses focus, the page is suspended, or the page is closed. CDexamSave merges overlapping browser signals into one incident. If the student returns before the configured grace period, the provisional incident is discarded. Otherwise the open incident is shown to the teacher and is closed when focus returns.
+## Security and privacy by design
 
-Server receipt time is authoritative for the event chronology. Bounded client duration is retained so that an incident can still be reconstructed when a background browser delays or loses its initial beacon.
-
-## Important limits
-
-CDexamSave is a monitoring and deterrence tool, not a locked browser.
-
-- A normal web page cannot prevent Alt+Tab, open applications, virtual desktops, browser extensions, another device or an external AI service.
-- It cannot determine which other tab or application was used; it only knows that Moodle stopped being active.
-- Browser controls, operating-system dialogs, accessibility tools, notifications or brief connectivity problems can generate legitimate incidents.
-- A technically advanced user can interfere with client-side JavaScript. Server validation prevents impersonating another user or attempt, but cannot make an unmanaged device trustworthy.
-- Mobile operating systems may suspend background JavaScript, so an open incident can remain active until the student returns.
-- The event history is evidence for review, not proof by itself that cheating occurred.
-
-For high-stakes examinations, combine CDexamSave with randomised questions and answers, one-question-per-page navigation where appropriate, restricted review options, access-network controls, in-person supervision and Safe Exam Browser on supported managed devices.
-
-## Security and privacy
-
-- Every collector write requires the logged-in Moodle session and a valid `sesskey`.
+- Collector writes require a logged-in Moodle session and valid `sesskey`.
 - The server verifies attempt ownership, non-preview status, in-progress state and per-quiz activation.
 - Event and page-session UUIDs make writes idempotent.
-- Live and export endpoints perform Moodle login, context and capability checks.
-- Separate-group restrictions are revalidated server-side.
-- All report cells are built with `textContent`; browser data is never injected as HTML.
-- No visited URL, destination application, IP address, clipboard content, keystroke, screenshot, microphone or camera data is collected.
-- Browser alerts are opt-in because the student name and incident type may be visible in the teacher device's operating-system notification area.
-- Personal data export and deletion are implemented through Moodle's Privacy API.
-- A daily scheduled task enforces the configured retention period.
+- Report and export endpoints enforce context, capabilities and separate-group restrictions.
+- Report cells use `textContent`; browser data is not injected as HTML.
+- CSV export is hardened against spreadsheet-formula injection.
+- No destination URL, browsing history, IP address, clipboard content, keystroke, screenshot, camera, microphone or biometric data is collected.
+- Personal-data export and deletion use Moodle's Privacy API.
+- A scheduled task enforces the configured retention period.
 
-Before deployment, the institution should document the educational purpose and legal basis, inform students, set a proportionate retention period, limit report capabilities, and define a procedure for reviewing false positives.
+Before deployment, the institution should document necessity and proportionality, choose the legal basis, inform students, restrict permissions, define a false-positive review procedure and involve its data-protection officer where appropriate.
 
-## Backup and restore
+## Validation
 
-Quiz backup includes only the three reusable CDexamSave settings. Monitoring sessions and personal incident history are deliberately excluded from course backups and duplication.
+Run the structural validator:
 
-## Automated tests
+```bash
+python3 tools/validate_release.py
+```
 
 From a Moodle development installation:
 
@@ -130,23 +122,35 @@ php admin/tool/phpunit/cli/init.php
 vendor/bin/phpunit --testsuite quizaccess_cdexamsave_testsuite
 ```
 
-Rebuild AMD assets after editing JavaScript source:
+Rebuild AMD assets after JavaScript changes:
 
 ```bash
 npx grunt amd --root=mod/quiz/accessrule/cdexamsave
 ```
 
-The distributed ZIP already contains compiled AMD files.
+Real-browser and real-Moodle acceptance requirements are documented in `TESTING.md` and `docs/RELEASE_CHECKLIST.md`.
 
-## Manual acceptance test
+## Documentation
 
-1. Create a test quiz, enable CDexamSave and start an attempt as a student.
-2. Open the live report in a separate teacher account.
-3. Switch the student to another tab for longer than the grace period.
-4. Confirm that the teacher sees **Outside Moodle** within the configured refresh interval.
-5. Return to the quiz and acknowledge the student warning.
-6. Confirm that the incident closes with a duration and appears in the CSV.
-7. Repeat with a sub-grace switch, normal quiz page submission, separate groups, session expiry and temporary network loss.
+- [Administrator and teacher guide](docs/ADMIN_TEACHER_GUIDE_EN.md)
+- [Guía para administración y profesorado](docs/GUIA_ADMIN_PROFESORADO_ES.md)
+- [English Marketplace listing](docs/MARKETPLACE_LISTING_EN.md)
+- [Ficha española para Marketplace](docs/MARKETPLACE_LISTING_ES.md)
+- [Privacy notice template](docs/PRIVACY_NOTICE_TEMPLATE_EN.md)
+- [Plantilla de información de privacidad](docs/PLANTILLA_INFORMACION_PRIVACIDAD_ES.md)
+- [Brand guide](docs/BRAND_GUIDE.md)
+- [Plan de lanzamiento y crecimiento](docs/LAUNCH_PLAN_ES.md)
+- [Security policy](SECURITY.md)
+- [Contributing](CONTRIBUTING.md)
+
+## Maintainer
+
+- Author and copyright holder: **Carlos Díaz Bueno**
+- Institutional affiliation: **Colegio Sagrada Familia – Siervas de San José, Salamanca, Spain**
+- Support: https://github.com/cdiazbu/moodle-quizaccess_cdexamsave/issues
+- Issues: https://github.com/cdiazbu/moodle-quizaccess_cdexamsave/issues
+
+The affiliation identifies the educational setting in which the plugin was developed. It does not by itself transfer ownership or legal responsibility to the school.
 
 ## Licence
 

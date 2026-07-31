@@ -2,10 +2,10 @@
 // This file is part of Moodle - http://moodle.org/
 
 /**
- * Restore support for per-quiz CDexamSave settings.
+ * Restore support for per-quiz CD ExamFocus settings.
  *
  * @package    quizaccess_cdexamsave
- * @copyright  2026 Carlos Díaz Bueno <carlosdiazbueno@gmail.com>
+ * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class restore_quizaccess_cdexamsave_subplugin extends restore_mod_quiz_access_subplugin {

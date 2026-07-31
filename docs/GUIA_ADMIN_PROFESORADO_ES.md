@@ -1,8 +1,8 @@
-# Guía de CDexamSave para administración y profesorado
+# Guía de CD ExamFocus para administración y profesorado
 
 ## 1. Finalidad y límites
 
-CDexamSave registra cambios de foco del navegador durante intentos reales y en curso de cuestionarios Moodle. Ayuda a localizar intentos que requieren revisión. No bloquea otras aplicaciones, no muestra qué abrió el alumno y no demuestra por sí solo una conducta indebida.
+CD ExamFocus registra cambios de foco del navegador durante intentos reales y en curso de cuestionarios Moodle. Ayuda a localizar intentos que requieren revisión. No bloquea otras aplicaciones, no muestra qué abrió el alumno y no demuestra por sí solo una conducta indebida.
 
 ## 2. Instalación por el administrador
 
@@ -11,7 +11,7 @@ CDexamSave registra cambios de foco del navegador durante intentos reales y en c
 3. Sube el ZIP desde **Administración del sitio > Extensiones > Instalar complementos**.
 4. Comprueba que Moodle detecta `quizaccess_cdexamsave` y que el ZIP contiene una única carpeta superior llamada `cdexamsave`.
 5. Completa la actualización de la base de datos y purga todas las cachés.
-6. Comprueba que aparece la tarea **Eliminar datos de supervisión caducados de CDexamSave** y que el cron se ejecuta.
+6. Comprueba que aparece la tarea **Eliminar datos de supervisión caducados de CD ExamFocus** y que el cron se ejecuta.
 7. Revisa las capacidades de los roles:
    - `quizaccess/cdexamsave:viewreport`
    - `quizaccess/cdexamsave:exportreport`
@@ -19,7 +19,7 @@ CDexamSave registra cambios de foco del navegador durante intentos reales y en c
 
 ## 3. Ajustes generales
 
-Revisa la sección de CDexamSave en los ajustes de reglas de acceso del cuestionario:
+Revisa la sección de CD ExamFocus en los ajustes de reglas de acceso del cuestionario:
 
 - **Plazo de conservación:** tiempo durante el que permanecen los datos finalizados.
 - **Actualización del informe:** intervalo de consulta del panel docente.
@@ -32,13 +32,13 @@ Empieza con los valores predeterminados. Sube el intervalo del informe a cinco o
 ## 4. Activar un cuestionario supervisado
 
 1. Abre el cuestionario y entra en **Editar ajustes**.
-2. Despliega **Restricciones extra sobre los intentos > CDexamSave**.
+2. Despliega **Restricciones extra sobre los intentos > CD ExamFocus**.
 3. Activa **Supervisión del foco**.
 4. Mantén el aviso al alumno salvo que exista una política local documentada que justifique otra opción.
 5. Elige el margen. Un segundo es un punto de partida razonable, pero debe probarse con los dispositivos del centro.
 6. Guarda y muestra el cuestionario.
 
-La página del cuestionario debe mostrar el aviso de supervisión. El personal autorizado también debe ver **Abrir informe en directo de CDexamSave**. La ruta directa es:
+La página del cuestionario debe mostrar el aviso de supervisión. El personal autorizado también debe ver **Abrir informe en directo de CD ExamFocus**. La ruta directa es:
 
 `/mod/quiz/accessrule/cdexamsave/report.php?cmid=ID_MODULO_CURSO`
 
@@ -76,7 +76,7 @@ Repite la prueba en cada combinación de navegador y dispositivo que se vaya a d
 
 Nunca trates un registro como prueba automática de copia. Pueden generarlo controles del navegador, diálogos del sistema, herramientas de accesibilidad, notificaciones, cambios de batería/conexión o suspensión móvil. El plugin no sabe qué pestaña o aplicación se abrió.
 
-Aplica un procedimiento de revisión humana y documentado. Valora el patrón, duración, repetición, momento de las preguntas, contexto técnico y explicación del alumno. No impongas automáticamente una penalización académica o disciplinaria basándote solo en CDexamSave.
+Aplica un procedimiento de revisión humana y documentado. Valora el patrón, duración, repetición, momento de las preguntas, contexto técnico y explicación del alumno. No impongas automáticamente una penalización académica o disciplinaria basándote solo en CD ExamFocus.
 
 ## 8. Solución de problemas
 

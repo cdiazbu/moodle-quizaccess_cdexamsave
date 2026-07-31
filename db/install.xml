@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/quiz/accessrule/cdexamsave/db" VERSION="2026073100" COMMENT="XMLDB file for CDexamSave"
+<XMLDB PATH="mod/quiz/accessrule/cdexamsave/db" VERSION="2026073100" COMMENT="XMLDB file for CD ExamFocus"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../../lib/xmldb/xmldb.xsd">
   <TABLES>
-    <TABLE NAME="quizaccess_cdexamsave" COMMENT="Per-quiz configuration for CDexamSave">
+    <TABLE NAME="quizaccess_cdexamsave" COMMENT="Per-quiz configuration for CD ExamFocus">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>

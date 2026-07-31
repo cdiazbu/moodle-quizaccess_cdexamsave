@@ -2,17 +2,17 @@
 // This file is part of Moodle - http://moodle.org/
 
 /**
- * English language strings for CDexamSave.
+ * English language strings for CD ExamFocus.
  *
  * @package    quizaccess_cdexamsave
- * @copyright  2026 Carlos Díaz Bueno <carlosdiazbueno@gmail.com>
+ * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname'] = 'CDexamSave focus monitoring';
-$string['formheader'] = 'CDexamSave: focus monitoring';
+$string['pluginname'] = 'CD ExamFocus focus monitoring';
+$string['formheader'] = 'CD ExamFocus: focus monitoring';
 $string['enabled'] = 'Enable focus monitoring';
 $string['enabled_help'] = 'Records when the quiz tab or window stops being active. Authorised staff can follow incidents in a near-real-time report.';
 $string['warnstudent'] = 'Warn the student after an incident';
@@ -25,15 +25,15 @@ $string['grace_onesecond'] = '1 second';
 $string['grace_twoseconds'] = '2 seconds';
 $string['grace_threeseconds'] = '3 seconds';
 $string['invalidgraceperiod'] = 'Select a valid grace period.';
-$string['monitoringnotice'] = 'CDexamSave monitoring is enabled. Leaving this quiz tab or window will be recorded and reported to authorised staff.';
+$string['monitoringnotice'] = 'CD ExamFocus monitoring is enabled. Leaving this quiz tab or window will be recorded and reported to authorised staff.';
 $string['monitoringbadge'] = 'Focus monitoring active';
 $string['studentwarningtitle'] = 'Focus change recorded';
 $string['studentwarningtext'] = 'This quiz stopped being the active window. The incident has been added to the teacher’s live report.';
 $string['studentwarningduration'] = 'Time away: {$a}';
 $string['continueattempt'] = 'Continue the quiz';
-$string['openlivereport'] = 'Open CDexamSave live report';
+$string['openlivereport'] = 'Open CD ExamFocus live report';
 
-$string['settingsheading'] = 'CDexamSave';
+$string['settingsheading'] = 'CD ExamFocus';
 $string['settingsheading_desc'] = 'Site-wide performance and retention settings. Monitoring is enabled separately in each quiz.';
 $string['retentiondays'] = 'Retention period (days)';
 $string['retentiondays_desc'] = 'Completed incident and session data older than this is deleted by the scheduled cleanup task. Minimum effective value: 1 day.';
@@ -46,13 +46,13 @@ $string['staleseconds_desc'] = 'An attempt is shown as disconnected after this p
 $string['maxincidents'] = 'Maximum incidents per attempt';
 $string['maxincidents_desc'] = 'Safety limit that prevents a malfunctioning or manipulated browser from filling the database. Values are limited to 100–10000.';
 
-$string['cdexamsave:viewreport'] = 'View the CDexamSave live report';
-$string['cdexamsave:exportreport'] = 'Export CDexamSave incident data';
+$string['cdexamsave:viewreport'] = 'View the CD ExamFocus live report';
+$string['cdexamsave:exportreport'] = 'Export CD ExamFocus incident data';
 
-$string['livereport'] = 'CDexamSave live report';
+$string['livereport'] = 'CD ExamFocus live report';
 $string['reportfor'] = 'Focus monitoring: {$a}';
 $string['reportintro'] = 'The panel refreshes automatically and lists all in-progress attempts plus the most recent focus-loss incidents.';
-$string['reportdisabled'] = 'CDexamSave is not currently enabled in this quiz.';
+$string['reportdisabled'] = 'CD ExamFocus is not currently enabled in this quiz.';
 $string['live'] = 'Live';
 $string['paused'] = 'Paused';
 $string['lastupdated'] = 'Last updated: {$a}';
@@ -62,7 +62,7 @@ $string['resumerefresh'] = 'Resume automatic refresh';
 $string['enablenotifications'] = 'Enable browser alerts';
 $string['notificationsenabled'] = 'Browser alerts enabled';
 $string['notificationsdenied'] = 'Browser alerts blocked';
-$string['notificationtitle'] = 'CDexamSave: new focus incident';
+$string['notificationtitle'] = 'CD ExamFocus: new focus incident';
 $string['notificationbody'] = '{$a->student} — {$a->reason}';
 $string['exportcsv'] = 'Export all incidents (CSV)';
 $string['activeattempts'] = 'Active attempts';
@@ -97,7 +97,7 @@ $string['reason_window_blur'] = 'Window lost focus';
 $string['reason_pagehide'] = 'Page closed or hidden';
 $string['reason_freeze'] = 'Page suspended';
 $string['reason_unknown'] = 'Focus change';
-$string['pollerror'] = 'The live data could not be updated. CDexamSave will retry automatically.';
+$string['pollerror'] = 'The live data could not be updated. CD ExamFocus will retry automatically.';
 $string['noscript'] = 'JavaScript is required to display the live report.';
 $string['privacywarning'] = 'This report contains personal assessment-monitoring data. Handle exported files according to your centre’s data-protection policy.';
 
@@ -112,9 +112,9 @@ $string['export_active'] = 'Still active';
 $string['yes'] = 'Yes';
 $string['no'] = 'No';
 
-$string['taskcleanup'] = 'Delete expired CDexamSave monitoring data';
-$string['invalidrequest'] = 'Invalid CDexamSave monitoring request.';
-$string['monitoringdisabled'] = 'CDexamSave monitoring is not enabled for this quiz.';
+$string['taskcleanup'] = 'Delete expired CD ExamFocus monitoring data';
+$string['invalidrequest'] = 'Invalid CD ExamFocus monitoring request.';
+$string['monitoringdisabled'] = 'CD ExamFocus monitoring is not enabled for this quiz.';
 $string['attemptnotmonitorable'] = 'This attempt cannot be monitored.';
 $string['incidentlimitreached'] = 'The incident safety limit for this attempt has been reached.';
 $string['invalidgroup'] = 'You cannot view data for that group.';
@@ -133,4 +133,4 @@ $string['privacy:metadata:quizaccess_cdexamsave_sess:attemptid'] = 'The monitore
 $string['privacy:metadata:quizaccess_cdexamsave_sess:userid'] = 'The student whose attempt was monitored.';
 $string['privacy:metadata:quizaccess_cdexamsave_sess:pagesessionid'] = 'A random identifier for the browser monitoring session.';
 $string['privacy:metadata:quizaccess_cdexamsave_sess:state'] = 'Connection, focus and heartbeat state.';
-$string['privacy:path'] = 'CDexamSave focus monitoring';
+$string['privacy:path'] = 'CD ExamFocus focus monitoring';
