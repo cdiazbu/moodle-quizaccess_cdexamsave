@@ -93,7 +93,7 @@ class incident_service {
                 $session->lostsince = 0;
             }
             $session->pagesessionid = $pagesessionid;
-        } elseif ($action === 'lost') {
+        } else if ($action === 'lost') {
             $event = self::record_loss(
                 $attempt,
                 $pagesessionid,
@@ -108,7 +108,7 @@ class incident_service {
                 $session->focuslost = 1;
                 $session->lostsince = (int) $event->timestart;
             }
-        } elseif ($action === 'returned') {
+        } else if ($action === 'returned') {
             self::record_return(
                 $attempt,
                 $pagesessionid,
