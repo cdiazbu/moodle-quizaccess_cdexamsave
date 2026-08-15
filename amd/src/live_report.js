@@ -7,8 +7,10 @@
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define([], function() {
+define(['core/ajax'], function(Ajax) {
     'use strict';
+
+    var METHOD_NAME = 'quizaccess_cdexamsave_get_live_data';
 
     /**
      * Create a cell with text-only content.
@@ -42,7 +44,7 @@ define([], function() {
     }
 
     /**
-     * Render live report state.
+     * Create a configured report instance.
      *
      * @param {Object} config Report configuration.
      * @return {Object}
@@ -53,6 +55,7 @@ define([], function() {
         var timer = null;
         var firstSnapshot = true;
         var knownIncidentIds = {};
+        var participants = [];
         var elements = {
             state: document.getElementById('cdexamsave-live-state'),
             updated: document.getElementById('cdexamsave-updated'),
@@ -60,28 +63,61 @@ define([], function() {
             pause: document.getElementById('cdexamsave-pause'),
             notifications: document.getElementById('cdexamsave-notifications'),
             error: document.getElementById('cdexamsave-error'),
+            search: document.getElementById('cdexamsave-search'),
+            filter: document.getElementById('cdexamsave-filter'),
             participants: document.getElementById('cdexamsave-participants-body'),
             incidents: document.getElementById('cdexamsave-incidents-body'),
             active: document.getElementById('cdexamsave-count-active'),
             attention: document.getElementById('cdexamsave-count-attention'),
+            review: document.getElementById('cdexamsave-count-review'),
             connected: document.getElementById('cdexamsave-count-connected'),
             totalincidents: document.getElementById('cdexamsave-count-incidents')
         };
 
         /**
-         * Render participant rows safely using textContent.
+         * Test one participant against client-side controls.
          *
-         * @param {Array} participants Participant data.
+         * @param {Object} participant Participant data.
+         * @return {Boolean}
          */
-        function renderParticipants(participants) {
+        function isVisible(participant) {
+            var query = elements.search.value.trim().toLocaleLowerCase();
+            var filter = elements.filter.value;
+            if (query && participant.fullname.toLocaleLowerCase().indexOf(query) === -1) {
+                return false;
+            }
+            if (filter === 'review') {
+                return participant.needsreview;
+            }
+            if (filter === 'attention') {
+                return participant.focuslost;
+            }
+            if (filter === 'disconnected') {
+                return participant.status === 'disconnected';
+            }
+            return true;
+        }
+
+        /**
+         * Render participant rows safely using textContent.
+         */
+        function renderParticipants() {
+            var visible = participants.filter(isVisible);
             elements.participants.textContent = '';
-            if (!participants.length) {
-                emptyRow(elements.participants, config.strings.noAttempts, 7);
+            if (!visible.length) {
+                emptyRow(
+                    elements.participants,
+                    participants.length ? config.strings.noFilteredAttempts : config.strings.noAttempts,
+                    8
+                );
                 return;
             }
-            participants.forEach(function(participant) {
+            visible.forEach(function(participant) {
                 var row = document.createElement('tr');
                 row.className = 'cdexamsave-participant-' + participant.status;
+                if (participant.needsreview) {
+                    row.classList.add('cdexamsave-participant-review');
+                }
                 row.appendChild(cell(participant.fullname, 'font-weight-bold'));
                 row.appendChild(cell(participant.attempt));
 
@@ -97,6 +133,16 @@ define([], function() {
                     participant.focustext,
                     participant.focuslost ? 'font-weight-bold text-danger' : ''
                 ));
+
+                var review = cell(participant.reviewtext);
+                var reviewBadge = document.createElement('span');
+                reviewBadge.className = 'cdexamsave-review cdexamsave-review-' +
+                    (participant.needsreview ? 'recommended' : 'normal');
+                reviewBadge.textContent = participant.reviewtext;
+                review.textContent = '';
+                review.appendChild(reviewBadge);
+                row.appendChild(review);
+
                 row.appendChild(cell(participant.incidentcount));
                 row.appendChild(cell(participant.totaldurationtext));
                 row.appendChild(cell(participant.lastheartbeattext));
@@ -167,10 +213,12 @@ define([], function() {
         function render(data) {
             elements.active.textContent = data.summary.activeAttempts;
             elements.attention.textContent = data.summary.attentionNow;
+            elements.review.textContent = data.summary.needsReview;
             elements.connected.textContent = data.summary.connectedAttempts;
             elements.totalincidents.textContent = data.summary.totalIncidents;
             elements.updated.textContent = config.strings.lastUpdated.replace('{$a}', data.serverTimeText);
-            renderParticipants(data.participants || []);
+            participants = data.participants || [];
+            renderParticipants();
             notifyNewIncidents(data.incidents || []);
             renderIncidents(data.incidents || []);
         }
@@ -188,7 +236,7 @@ define([], function() {
         }
 
         /**
-         * Fetch one live snapshot.
+         * Fetch one live snapshot through Moodle's AJAX external-service API.
          *
          * @return {Promise}
          */
@@ -198,16 +246,13 @@ define([], function() {
                 return Promise.resolve();
             }
             busy = true;
-            return fetch(config.liveUrl, {
-                credentials: 'same-origin',
-                cache: 'no-store',
-                headers: {'Accept': 'application/json'}
-            }).then(function(response) {
-                if (!response.ok) {
-                    throw new Error('Live report request failed');
+            return Ajax.call([{
+                methodname: METHOD_NAME,
+                args: {
+                    cmid: config.cmId,
+                    groupid: config.groupId
                 }
-                return response.json();
-            }).then(function(data) {
+            }])[0].then(function(data) {
                 elements.error.classList.add('d-none');
                 elements.error.textContent = '';
                 render(data);
@@ -272,6 +317,8 @@ define([], function() {
                 });
             });
             elements.pause.addEventListener('click', togglePause);
+            elements.search.addEventListener('input', renderParticipants);
+            elements.filter.addEventListener('change', renderParticipants);
             if (window.Notification) {
                 elements.notifications.addEventListener('click', enableNotifications);
                 if (window.Notification.permission === 'granted') {
@@ -302,7 +349,7 @@ define([], function() {
          * @param {Object} config Server-supplied configuration.
          */
         init: function(config) {
-            if (!config || !config.liveUrl || !window.fetch) {
+            if (!config || !config.cmId) {
                 return;
             }
             createReport(config).start();

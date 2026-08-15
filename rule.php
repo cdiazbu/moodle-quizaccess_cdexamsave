@@ -179,7 +179,7 @@ class quizaccess_cdexamsave extends \mod_quiz\local\access_rule_base {
      * @return void
      */
     public function setup_attempt_page($page) {
-        global $CFG, $DB, $USER;
+        global $DB, $USER;
 
         $attemptid = optional_param('attempt', 0, PARAM_INT);
         if (!$attemptid) {
@@ -202,7 +202,6 @@ class quizaccess_cdexamsave extends \mod_quiz\local\access_rule_base {
         $config = [
             'attemptId' => (int) $attemptid,
             'cmId' => (int) $cm->id,
-            'collectorUrl' => $CFG->wwwroot . '/mod/quiz/accessrule/cdexamsave/collector.php',
             'gracePeriodMs' => (int) $this->quiz->cdexamsavegraceperiodms,
             'heartbeatMs' => $heartbeat * 1000,
             'warnStudent' => !empty($this->quiz->cdexamsavewarnstudent),

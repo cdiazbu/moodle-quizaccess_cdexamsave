@@ -7,11 +7,12 @@
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define([], function() {
+define(['core/ajax'], function(Ajax) {
     'use strict';
 
     var MAX_QUEUE_ITEMS = 100;
     var MAX_QUEUE_AGE_MS = 24 * 60 * 60 * 1000;
+    var METHOD_NAME = 'quizaccess_cdexamsave_record_signal';
 
     /**
      * Generate a standards-compliant random UUID v4.
@@ -40,7 +41,8 @@ define([], function() {
     function createMonitor(config) {
         var pagesessionid = uuid();
         var queuekey = 'quizaccess_cdexamsave_queue_v1';
-        var endpoint = config.collectorUrl + '?sesskey=' + encodeURIComponent(M.cfg.sesskey);
+        var endpoint = M.cfg.wwwroot + '/lib/ajax/service.php?sesskey=' +
+            encodeURIComponent(M.cfg.sesskey) + '&info=' + METHOD_NAME;
         var currentloss = null;
         var intentionalnavigation = false;
         var heartbeattimer = null;
@@ -100,8 +102,9 @@ define([], function() {
         }
 
         /**
-         * Send one signal. Network and 5xx failures are retried; rejected
-         * signals are not, because the server has already validated them.
+         * Send one signal through Moodle's AJAX external-service API. Beacon
+         * transport is retained for page lifecycle events so a tab closure is
+         * less likely to lose the final signal.
          *
          * @param {Object} payload Complete collector payload.
          * @param {Boolean} beacon Prefer sendBeacon for page lifecycle events.
@@ -109,7 +112,11 @@ define([], function() {
          * @return {Promise}
          */
         function send(payload, beacon, queueonfailure) {
-            var body = JSON.stringify(payload);
+            var body = JSON.stringify([{
+                index: 0,
+                methodname: METHOD_NAME,
+                args: payload
+            }]);
             if (beacon && navigator.sendBeacon) {
                 var accepted = navigator.sendBeacon(
                     endpoint,
@@ -120,22 +127,39 @@ define([], function() {
                 }
             }
 
-            return fetch(endpoint, {
-                method: 'POST',
-                credentials: 'same-origin',
-                cache: 'no-store',
-                keepalive: true,
-                headers: {'Content-Type': 'application/json'},
-                body: body
-            }).then(function(response) {
-                if (!response.ok && response.status >= 500) {
-                    throw new Error('Temporary collector error');
-                }
-                return null;
-            }).catch(function(error) {
+            var request;
+            if (beacon && window.fetch) {
+                request = fetch(endpoint, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    cache: 'no-store',
+                    keepalive: true,
+                    headers: {'Content-Type': 'application/json'},
+                    body: body
+                }).then(function(response) {
+                    if (!response.ok) {
+                        throw new Error('External service request failed');
+                    }
+                    return response.json();
+                }).then(function(result) {
+                    if (result[0] && result[0].error) {
+                        throw new Error('External service rejected the signal');
+                    }
+                    return null;
+                });
+            } else {
+                request = Ajax.call([{
+                    methodname: METHOD_NAME,
+                    args: payload
+                }])[0].then(function() {
+                    return null;
+                });
+            }
+
+            return request.catch(function(error) {
                 if (queueonfailure) {
                     enqueue(payload);
-                    return;
+                    return null;
                 }
                 throw error;
             });
@@ -402,7 +426,7 @@ define([], function() {
          * @param {Object} config Server-supplied configuration.
          */
         init: function(config) {
-            if (!config || !config.attemptId || !config.collectorUrl || !window.fetch || !window.crypto) {
+            if (!config || !config.attemptId || !window.crypto) {
                 return;
             }
             createMonitor(config).start();

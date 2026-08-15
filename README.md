@@ -26,9 +26,10 @@ The plugin reports what it can actually observe. **No focus-loss incidents detec
 - Merge overlapping signals and ignore very brief changes with a configurable grace period.
 - Notify the student after returning to the exam.
 - Follow active attempts in a teacher report refreshed every 2–30 seconds.
-- See focus state, connection state, incident count and accumulated time away.
+- See focus state, connection state, incident count, accumulated time away and a configurable human-review priority.
+- Search and filter active attempts so large cohorts can be triaged quickly.
 - Receive optional native browser notifications for new incidents.
-- Export the permitted incident history to CSV.
+- Export either a per-attempt summary (including zero-incident attempts) or the detailed incident history to CSV.
 - Respect Moodle capabilities and separate groups on the server.
 - Keep all monitoring data inside the Moodle site's own database.
 - Apply configurable retention through Moodle cron and support the Privacy API.
@@ -80,6 +81,7 @@ Global limits are under **Site administration > Plugins > Activity modules > Qui
 - student heartbeat: 10 seconds;
 - disconnected threshold: 35 seconds;
 - maximum incidents per attempt: 2,000.
+- review priority: 3 incidents or 60 cumulative seconds away.
 
 For a specific exam:
 
@@ -91,11 +93,11 @@ For a specific exam:
 6. Open **CD ExamFocus live report** as an authorised teacher.
 7. Test with a separate student account making a real attempt. Teacher preview attempts are intentionally excluded.
 
-The report requires `quizaccess/cdexamsave:viewreport`. CSV export additionally requires `quizaccess/cdexamsave:exportreport`.
+The report requires `quizaccess/cdexamsave:viewreport`. CSV export additionally requires `quizaccess/cdexamsave:exportreport`. Review priority is a configurable workflow aid; it never determines misconduct.
 
 ## Security and privacy by design
 
-- Collector writes require a logged-in Moodle session and valid `sesskey`.
+- Student signals and live report reads use Moodle AJAX external functions, a logged-in session and valid `sesskey`.
 - The server verifies attempt ownership, non-preview status, in-progress state and per-quiz activation.
 - Event and page-session UUIDs make writes idempotent.
 - Report and export endpoints enforce context, capabilities and separate-group restrictions.

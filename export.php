@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * CSV export of all visible focus-loss incidents for a quiz.
+ * CSV exports for visible focus-loss data in a quiz.
  *
  * @package    quizaccess_cdexamsave
  * @copyright  2026 Carlos Díaz Bueno
@@ -38,6 +38,10 @@ function quizaccess_cdexamsave_csv_safe(string $value): string {
 
 $cmid = required_param('cmid', PARAM_INT);
 $groupid = optional_param('group', 0, PARAM_INT);
+$mode = optional_param('mode', 'incidents', PARAM_ALPHA);
+if (!in_array($mode, ['incidents', 'summary'], true)) {
+    throw new moodle_exception('invalidrequest', 'quizaccess_cdexamsave');
+}
 $cm = get_coursemodule_from_id('quiz', $cmid, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
 $quiz = $DB->get_record('quiz', ['id' => $cm->instance], '*', MUST_EXIST);
@@ -45,33 +49,66 @@ require_login($course, false, $cm);
 $context = context_module::instance($cm->id);
 require_capability('quizaccess/cdexamsave:exportreport', $context);
 
-$rows = \quizaccess_cdexamsave\local\report_service::get_export_rows($cm, $groupid);
 $export = new csv_export_writer();
-$export->set_filename(clean_filename('CD ExamFocus-' . format_string($quiz->name) . '-' . userdate(time(), '%Y%m%d-%H%M')));
-$export->add_data([
-    get_string('export_student', 'quizaccess_cdexamsave'),
-    get_string('export_userid', 'quizaccess_cdexamsave'),
-    get_string('export_attempt', 'quizaccess_cdexamsave'),
-    get_string('export_started', 'quizaccess_cdexamsave'),
-    get_string('export_returned', 'quizaccess_cdexamsave'),
-    get_string('export_duration', 'quizaccess_cdexamsave'),
-    get_string('export_reason', 'quizaccess_cdexamsave'),
-    get_string('export_active', 'quizaccess_cdexamsave'),
-]);
+$export->set_filename(clean_filename(
+    'CD ExamFocus-' . $mode . '-' . format_string($quiz->name) . '-' . userdate(time(), '%Y%m%d-%H%M')
+));
 
-$now = time();
-foreach ($rows as $row) {
-    $active = empty($row->timeend);
-    $duration = $active ? max(0, $now - (int) $row->timestart) : (int) $row->duration;
+if ($mode === 'summary') {
+    $rows = \quizaccess_cdexamsave\local\report_service::get_attempt_summary_rows($cm, $groupid);
     $export->add_data([
-        quizaccess_cdexamsave_csv_safe(fullname($row)),
-        (int) $row->userid,
-        (int) $row->attempt,
-        userdate((int) $row->timestart),
-        $active ? '' : userdate((int) $row->timeend),
-        $duration,
-        get_string('reason_' . $row->reason, 'quizaccess_cdexamsave'),
-        get_string($active ? 'yes' : 'no', 'quizaccess_cdexamsave'),
+        get_string('export_student', 'quizaccess_cdexamsave'),
+        get_string('export_userid', 'quizaccess_cdexamsave'),
+        get_string('export_attempt', 'quizaccess_cdexamsave'),
+        get_string('export_state', 'quizaccess_cdexamsave'),
+        get_string('export_start', 'quizaccess_cdexamsave'),
+        get_string('export_finish', 'quizaccess_cdexamsave'),
+        get_string('export_incidentcount', 'quizaccess_cdexamsave'),
+        get_string('export_totalduration', 'quizaccess_cdexamsave'),
+        get_string('export_maxduration', 'quizaccess_cdexamsave'),
+        get_string('export_needsreview', 'quizaccess_cdexamsave'),
     ]);
+    foreach ($rows as $row) {
+        $export->add_data([
+            quizaccess_cdexamsave_csv_safe(fullname($row)),
+            (int) $row->userid,
+            (int) $row->attempt,
+            get_string('state' . $row->state, 'quiz'),
+            userdate((int) $row->timestart),
+            empty($row->timefinish) ? '' : userdate((int) $row->timefinish),
+            (int) $row->incidentcount,
+            (int) $row->totalduration,
+            (int) $row->maxduration,
+            get_string($row->needsreview ? 'reviewrecommended' : 'reviewnotneeded', 'quizaccess_cdexamsave'),
+        ]);
+    }
+} else {
+    $rows = \quizaccess_cdexamsave\local\report_service::get_export_rows($cm, $groupid);
+    $export->add_data([
+        get_string('export_student', 'quizaccess_cdexamsave'),
+        get_string('export_userid', 'quizaccess_cdexamsave'),
+        get_string('export_attempt', 'quizaccess_cdexamsave'),
+        get_string('export_started', 'quizaccess_cdexamsave'),
+        get_string('export_returned', 'quizaccess_cdexamsave'),
+        get_string('export_duration', 'quizaccess_cdexamsave'),
+        get_string('export_reason', 'quizaccess_cdexamsave'),
+        get_string('export_active', 'quizaccess_cdexamsave'),
+    ]);
+
+    $now = time();
+    foreach ($rows as $row) {
+        $active = empty($row->timeend);
+        $duration = $active ? max(0, $now - (int) $row->timestart) : (int) $row->duration;
+        $export->add_data([
+            quizaccess_cdexamsave_csv_safe(fullname($row)),
+            (int) $row->userid,
+            (int) $row->attempt,
+            userdate((int) $row->timestart),
+            $active ? '' : userdate((int) $row->timeend),
+            $duration,
+            get_string('reason_' . $row->reason, 'quizaccess_cdexamsave'),
+            get_string($active ? 'yes' : 'no', 'quizaccess_cdexamsave'),
+        ]);
+    }
 }
 $export->download_file();

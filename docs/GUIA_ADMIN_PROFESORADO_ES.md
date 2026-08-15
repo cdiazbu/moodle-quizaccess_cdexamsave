@@ -26,6 +26,7 @@ Revisa la sección de CD ExamFocus en los ajustes de reglas de acceso del cuesti
 - **Señal del alumno:** frecuencia de las señales de conexión activa.
 - **Umbral de desconexión:** tiempo sin señal para mostrar un intento como desconectado.
 - **Máximo de incidentes:** protección frente a fallos o abuso.
+- **Umbrales de incidentes / duración para revisión:** criterios neutrales para priorizar intentos que pueden requerir revisión contextual.
 
 Empieza con los valores predeterminados. Sube el intervalo del informe a cinco o diez segundos si varios docentes supervisarán simultáneamente grupos grandes.
 
@@ -55,7 +56,7 @@ Usa dos cuentas distintas y, preferiblemente, dos perfiles del navegador:
 5. El profesor comprueba que aparece la pérdida de foco dentro del intervalo de actualización.
 6. El alumno regresa y confirma el aviso.
 7. El profesor comprueba que el incidente se cierra con una duración.
-8. Se exporta el CSV y se verifica el mismo incidente.
+8. Se exportan los dos CSV; se comprueba el incidente y que el resumen incluya también un intento sin incidencias.
 9. Se repite con una salida inferior al margen; no debe quedar un incidente persistente.
 10. Se entrega el examen normalmente y se comprueba que la navegación o entrega no genera una falsa incidencia persistente.
 
@@ -69,8 +70,10 @@ Repite la prueba en cada combinación de navegador y dispositivo que se vaya a d
    - **Conectado / Activo:** hay señales recientes y el intento tiene el foco.
    - **Fuera de Moodle / Foco perdido:** existe un incidente abierto.
    - **Sin señal reciente:** se superó el umbral; puede deberse a desconexión, suspensión o interrupción del script.
-4. Antes de actuar, recoge el contexto: duración, repetición, incidencia técnica y observación en el aula.
-5. Exporta el CSV solo cuando sea necesario y protégelo como información de evaluación.
+   - **Revisión recomendada:** se alcanzó un umbral configurable o el foco está perdido; sirve para ordenar el trabajo, no para decidir una conducta.
+4. Usa la búsqueda por alumno y los filtros de revisión, foco o desconexión para grupos grandes.
+5. Antes de actuar, recoge el contexto: duración, repetición, incidencia técnica y observación en el aula.
+6. Exporta cualquiera de los CSV solo cuando sea necesario y protégelo como información de evaluación.
 
 ## 7. Interpretación
 
@@ -86,7 +89,7 @@ Aplica un procedimiento de revisión humana y documentado. Valora el patrón, du
 - Usa una cuenta de alumno y un intento real; las vistas previas están excluidas.
 - Purga las cachés.
 - Comprueba JavaScript y que la política de seguridad de contenidos no bloquee los módulos AMD.
-- Revisa Consola y Red del navegador buscando errores de `quizaccess_cdexamsave/monitor` y `collector.php`.
+- Revisa Consola y Red del navegador buscando errores de `quizaccess_cdexamsave/monitor` y del servicio AJAX de Moodle `/lib/ajax/service.php`.
 - Comprueba que el intento sigue en estado `inprogress`.
 - Verifica URL y HTTPS del sitio.
 - Activa la depuración de desarrollador en la réplica y reproduce el fallo.

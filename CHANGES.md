@@ -1,5 +1,15 @@
 # Change log
 
+## 1.0.3 — 2026-08-15
+
+- Replaced the custom student collector and live-report endpoints with Moodle AJAX external functions registered in `db/services.php` and consumed through `core/ajax`.
+- Preserved beacon and keepalive delivery for page lifecycle signals while routing them through Moodle's standard external-service endpoint.
+- Added configurable, neutral human-review thresholds based on incident count and cumulative time away.
+- Added a review-priority summary card, student search and focused filters to the live teacher report.
+- Added a new attempt-summary CSV covering all non-preview attempts, including attempts with zero incidents, alongside the detailed incident export.
+- Added explicit interface guidance that review priority is a triage aid rather than proof of misconduct.
+- Expanded automated coverage for review thresholds and the permission-aware live external function.
+
 ## 1.0.2 — 2026-07-31
 
 - Introduced the public brand **CD ExamFocus** while retaining the stable `quizaccess_cdexamsave` technical component.

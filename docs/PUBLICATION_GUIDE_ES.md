@@ -38,7 +38,7 @@ Las simulaciones incluidas son útiles, pero no sustituyen esta prueba real.
 2. La raíz del repositorio debe ser la raíz del plugin: `version.php`, `rule.php`, `lang/`, `classes/`, etc. No subas una carpeta contenedora adicional.
 3. Activa GitHub Issues.
 4. Sube `README.md`, `CHANGES.md`, `LICENSE.md`, `SECURITY.md`, `CONTRIBUTING.md`, `TESTING.md` y `docs/`.
-5. Crea una etiqueta firmada o anotada `v1.0.2` que apunte exactamente al código estable enviado.
+5. Crea una etiqueta firmada o anotada `v1.0.3` que apunte exactamente al código estable enviado.
 6. Genera el ZIP desde el contenido de la versión y comprueba que su carpeta superior sea `cdexamsave`.
 7. No incluyas secretos, datos de alumnos, exportaciones, archivos del servidor ni configuraciones locales.
 

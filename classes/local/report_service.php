@@ -25,6 +25,44 @@ namespace quizaccess_cdexamsave\local;
  */
 class report_service {
     /**
+     * Return bounded site-wide review thresholds.
+     *
+     * @return array Incident-count and cumulative-duration thresholds.
+     */
+    public static function get_review_thresholds(): array {
+        $incidentcount = (int) get_config('quizaccess_cdexamsave', 'reviewincidentcount');
+        $duration = (int) get_config('quizaccess_cdexamsave', 'reviewduration');
+
+        return [
+            'incidentcount' => max(1, min(100, $incidentcount ?: 3)),
+            'duration' => max(1, min(DAYSECS, $duration ?: 60)),
+        ];
+    }
+
+    /**
+     * Decide whether an attempt should be prioritised for human review.
+     *
+     * This is a workflow aid only. It does not classify misconduct.
+     *
+     * @param int $incidentcount Number of incidents.
+     * @param int $totalduration Cumulative duration in seconds.
+     * @param bool $focuslost Whether focus is currently lost.
+     * @param array|null $thresholds Optional thresholds for deterministic tests.
+     * @return bool
+     */
+    public static function needs_review(
+        int $incidentcount,
+        int $totalduration,
+        bool $focuslost = false,
+        ?array $thresholds = null
+    ): bool {
+        $thresholds = $thresholds ?? self::get_review_thresholds();
+        return $focuslost ||
+            $incidentcount >= (int) $thresholds['incidentcount'] ||
+            $totalduration >= (int) $thresholds['duration'];
+    }
+
+    /**
      * Build the live report payload.
      *
      * @param \stdClass $cm Quiz course-module record.
@@ -93,6 +131,8 @@ class report_service {
         $participantrows = [];
         $attentioncount = 0;
         $connectedcount = 0;
+        $reviewcount = 0;
+        $reviewthresholds = self::get_review_thresholds();
         foreach ($attempts as $attempt) {
             $attemptid = (int) $attempt->attemptid;
             $session = $sessions[$attemptid] ?? null;
@@ -116,6 +156,16 @@ class report_service {
             if ($focuslost && !empty($session->lostsince)) {
                 $totalduration += max(0, $now - (int) $session->lostsince);
             }
+            $incidentcount = $aggregate ? (int) $aggregate->incidentcount : 0;
+            $needsreview = self::needs_review(
+                $incidentcount,
+                $totalduration,
+                (bool) $focuslost,
+                $reviewthresholds
+            );
+            if ($needsreview) {
+                $reviewcount++;
+            }
             $participantrows[] = [
                 'attemptid' => $attemptid,
                 'userid' => (int) $attempt->userid,
@@ -125,19 +175,23 @@ class report_service {
                 'statustext' => get_string('status_' . $status, 'quizaccess_cdexamsave'),
                 'focuslost' => (bool) $focuslost,
                 'focustext' => get_string($focuslost ? 'focus_lost' : 'focus_ok', 'quizaccess_cdexamsave'),
-                'incidentcount' => $aggregate ? (int) $aggregate->incidentcount : 0,
+                'incidentcount' => $incidentcount,
                 'totalduration' => $totalduration,
                 'totaldurationtext' => format_time($totalduration),
                 'lastheartbeat' => $lastheartbeat,
                 'lastheartbeattext' => $lastheartbeat ? userdate($lastheartbeat, get_string('strftimetime', 'langconfig')) : '—',
                 'attemptstarted' => (int) $attempt->timestart,
                 'attemptstartedtext' => userdate((int) $attempt->timestart),
+                'needsreview' => $needsreview,
+                'reviewtext' => get_string($needsreview ? 'reviewrecommended' : 'reviewnotneeded', 'quizaccess_cdexamsave'),
             ];
         }
 
         usort($participantrows, static function (array $left, array $right): int {
-            $weights = ['attention' => 0, 'disconnected' => 1, 'notstarted' => 2, 'connected' => 3];
-            $comparison = $weights[$left['status']] <=> $weights[$right['status']];
+            $weights = ['attention' => 0, 'disconnected' => 2, 'notstarted' => 3, 'connected' => 4];
+            $leftweight = $left['needsreview'] && $left['status'] !== 'attention' ? 1 : $weights[$left['status']];
+            $rightweight = $right['needsreview'] && $right['status'] !== 'attention' ? 1 : $weights[$right['status']];
+            $comparison = $leftweight <=> $rightweight;
             return $comparison ?: strcasecmp($left['fullname'], $right['fullname']);
         });
 
@@ -151,6 +205,7 @@ class report_service {
                 'activeAttempts' => count($participantrows),
                 'attentionNow' => $attentioncount,
                 'connectedAttempts' => $connectedcount,
+                'needsReview' => $reviewcount,
                 'totalIncidents' => $totalincidents,
             ],
             'participants' => $participantrows,
@@ -182,6 +237,65 @@ class report_service {
                  WHERE e.quizid = :quizid {$userwhere}
               ORDER BY e.timestart ASC, e.id ASC";
         return array_values($DB->get_records_sql($sql, $params));
+    }
+
+    /**
+     * Get one export row per non-preview attempt, including attempts without
+     * focus-loss incidents.
+     *
+     * @param \stdClass $cm Quiz course-module record.
+     * @param int $groupid Selected group, or zero.
+     * @return array
+     */
+    public static function get_attempt_summary_rows(\stdClass $cm, int $groupid = 0): array {
+        global $DB;
+
+        $context = \context_module::instance($cm->id);
+        require_capability('quizaccess/cdexamsave:exportreport', $context);
+        $alloweduserids = self::get_allowed_userids($cm, $context, $groupid);
+        [$userwhere, $userparams] = self::user_filter_sql('qa.userid', $alloweduserids, 'summaryuser');
+        $params = array_merge([
+            'quizid' => $cm->instance,
+            'nowtotals' => time(),
+            'nowmaximum' => time(),
+        ], $userparams);
+        $sql = "SELECT qa.id AS attemptid, qa.userid, qa.attempt, qa.state,
+                       qa.timestart, qa.timefinish,
+                       u.firstname, u.lastname, u.firstnamephonetic, u.lastnamephonetic,
+                       u.middlename, u.alternatename,
+                       COALESCE(e.incidentcount, 0) AS incidentcount,
+                       COALESCE(e.totalduration, 0) AS totalduration,
+                       COALESCE(e.maxduration, 0) AS maxduration
+                  FROM {quiz_attempts} qa
+                  JOIN {user} u ON u.id = qa.userid
+             LEFT JOIN (
+                           SELECT attemptid, COUNT(id) AS incidentcount,
+                                  SUM(CASE WHEN timeend = 0 THEN :nowtotals - timestart ELSE duration END)
+                                      AS totalduration,
+                                  MAX(CASE WHEN timeend = 0 THEN :nowmaximum - timestart ELSE duration END)
+                                      AS maxduration
+                             FROM {quizaccess_cdexamsave_evt}
+                         GROUP BY attemptid
+                       ) e ON e.attemptid = qa.id
+                 WHERE qa.quiz = :quizid
+                       AND qa.preview = 0
+                       {$userwhere}
+              ORDER BY u.lastname ASC, u.firstname ASC, qa.attempt ASC";
+
+        $thresholds = self::get_review_thresholds();
+        $rows = array_values($DB->get_records_sql($sql, $params));
+        foreach ($rows as $row) {
+            $row->incidentcount = (int) $row->incidentcount;
+            $row->totalduration = max(0, (int) $row->totalduration);
+            $row->maxduration = max(0, (int) $row->maxduration);
+            $row->needsreview = self::needs_review(
+                $row->incidentcount,
+                $row->totalduration,
+                false,
+                $thresholds
+            );
+        }
+        return $rows;
     }
 
     /**

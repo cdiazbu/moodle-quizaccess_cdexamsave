@@ -2,8 +2,9 @@
 
 ## Automated checks included in the release
 
-- Moodle PHPUnit tests for settings lifecycle and SQL integration.
+- Moodle PHPUnit tests for settings lifecycle, review thresholds and SQL integration.
 - Moodle PHPUnit tests for UUID validation and untrusted reason normalisation.
+- Moodle PHPUnit coverage for the permission-aware live AJAX external function and its declared return schema.
 - Package validator for XML well-formedness, required plugin files, language parity, string references, AMD build parity and forbidden accidental files.
 - JavaScript syntax parsing for both source and compiled AMD modules.
 - PHP syntax parsing for all plugin PHP files when PHP CLI is available.
@@ -22,6 +23,8 @@ Run the following on a staging copy of the target Moodle site before enabling a 
 | Connectivity | Offline during loss and reconnect on return | Retry queue sends a bounded, idempotent incident |
 | Access | Student, teacher, non-editing teacher, manager | Students cannot open report/export; authorised roles can |
 | Groups | No groups, visible groups, separate groups | Server response contains only permitted users |
+| Review workflow | Search; all/review/focus/disconnected filters; threshold boundaries | Rows and summary counts update without treating priority as a misconduct decision |
+| Export | Attempt summary and detailed incidents; attempts with zero incidents | Both CSV files respect capability/group restrictions and neutralise formula prefixes |
 | Lifecycle | Submit, abandon, delete attempt | Session becomes inactive; open incident closes; deleted attempt data is removed |
 | Privacy | Export/delete user request; context-wide deletion | Only approved context/user data is exported or erased |
 | Retention | Run cleanup task with old and new records | Only records older than configured cutoff are removed |

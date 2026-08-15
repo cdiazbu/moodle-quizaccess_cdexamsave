@@ -26,6 +26,7 @@ Review the CD ExamFocus section in the quiz access-rule settings:
 - **Student heartbeat:** frequency of active connection signals.
 - **Disconnected threshold:** time without a heartbeat before an attempt is shown as disconnected.
 - **Maximum incidents per attempt:** protection against malfunction or abuse.
+- **Review incident / duration thresholds:** neutral criteria for prioritising attempts that may merit contextual review.
 
 Start with the defaults. Increase the report refresh interval to five or ten seconds if several teachers will monitor large cohorts simultaneously.
 
@@ -55,7 +56,7 @@ Use two different accounts and preferably two browser profiles:
 5. The teacher confirms that the attempt shows focus loss within the refresh interval.
 6. The student returns and acknowledges the notice.
 7. The teacher confirms that the incident closes with a duration.
-8. Export CSV and verify the same incident.
+8. Export both CSV files; verify the incident and a zero-incident attempt in the summary.
 9. Repeat with a switch shorter than the grace period; no retained incident should remain.
 10. Submit the quiz normally and confirm that navigation/submission does not create a persistent false incident.
 
@@ -69,8 +70,10 @@ Repeat on every supported browser/device combination. Keep redacted screenshots 
    - **Connected / Active:** the attempt is sending recent signals and has focus.
    - **Outside Moodle / Focus lost:** an incident is currently open.
    - **No recent signal:** the heartbeat threshold was exceeded; this can mean lost connectivity, device suspension or script interruption.
-4. Record relevant context before contacting a student: duration, recurrence, device/network incident and classroom observation.
-5. Use the CSV only when necessary and store it under the centre's assessment-data controls.
+   - **Review recommended:** a configured threshold is met or focus is currently lost; this is a triage aid, not a finding.
+4. Use student search and the review/focus/disconnected filters to narrow large cohorts.
+5. Record relevant context before contacting a student: duration, recurrence, device/network incident and classroom observation.
+6. Use either CSV only when necessary and store it under the centre's assessment-data controls.
 
 ## 7. Interpreting incidents
 
@@ -86,7 +89,7 @@ Use a documented human-review procedure. Consider pattern, duration, recurrence,
 - Use a real student account and a real attempt; previews are excluded.
 - Purge Moodle caches.
 - Confirm JavaScript is enabled and no content-security policy blocks Moodle AMD modules.
-- Open browser developer tools and check Console/Network for `quizaccess_cdexamsave/monitor` and `collector.php` errors.
+- Open browser developer tools and check Console/Network for `quizaccess_cdexamsave/monitor` and Moodle `/lib/ajax/service.php` errors.
 - Confirm the attempt remains in the `inprogress` state.
 - Confirm the site URL and HTTPS configuration are correct.
 - Enable Moodle developer debugging on staging and reproduce the issue.

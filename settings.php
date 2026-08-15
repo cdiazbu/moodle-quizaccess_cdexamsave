@@ -70,4 +70,26 @@ if ($ADMIN->fulltree) {
         2000,
         PARAM_INT
     ));
+
+    $settings->add(new admin_setting_heading(
+        'quizaccess_cdexamsave/reviewpriority',
+        get_string('reviewprioritysettings', 'quizaccess_cdexamsave'),
+        get_string('reviewprioritysettings_desc', 'quizaccess_cdexamsave')
+    ));
+
+    $settings->add(new admin_setting_configtext(
+        'quizaccess_cdexamsave/reviewincidentcount',
+        get_string('reviewincidentcount', 'quizaccess_cdexamsave'),
+        get_string('reviewincidentcount_desc', 'quizaccess_cdexamsave'),
+        3,
+        PARAM_INT
+    ));
+
+    $settings->add(new admin_setting_configtext(
+        'quizaccess_cdexamsave/reviewduration',
+        get_string('reviewduration', 'quizaccess_cdexamsave'),
+        get_string('reviewduration_desc', 'quizaccess_cdexamsave'),
+        60,
+        PARAM_INT
+    ));
 }

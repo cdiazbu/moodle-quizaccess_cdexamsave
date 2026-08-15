@@ -44,16 +44,21 @@ $PAGE->set_heading(format_string($course->fullname));
 
 $refreshseconds = (int) get_config('quizaccess_cdexamsave', 'reportrefresh');
 $refreshseconds = max(2, min(30, $refreshseconds ?: 3));
-$liveurl = new moodle_url('/mod/quiz/accessrule/cdexamsave/live.php', [
+$exportparams = [
     'cmid' => $cm->id,
     'group' => $groupid,
-]);
-$exporturl = new moodle_url('/mod/quiz/accessrule/cdexamsave/export.php', [
-    'cmid' => $cm->id,
-    'group' => $groupid,
-]);
+];
+$incidentexporturl = new moodle_url(
+    '/mod/quiz/accessrule/cdexamsave/export.php',
+    $exportparams + ['mode' => 'incidents']
+);
+$summaryexporturl = new moodle_url(
+    '/mod/quiz/accessrule/cdexamsave/export.php',
+    $exportparams + ['mode' => 'summary']
+);
 $PAGE->requires->js_call_amd('quizaccess_cdexamsave/live_report', 'init', [[
-    'liveUrl' => $liveurl->out(false),
+    'cmId' => (int) $cm->id,
+    'groupId' => (int) $groupid,
     'refreshMs' => $refreshseconds * 1000,
     'strings' => [
         'live' => get_string('live', 'quizaccess_cdexamsave'),
@@ -69,6 +74,7 @@ $PAGE->requires->js_call_amd('quizaccess_cdexamsave/live_report', 'init', [[
             'reason' => '{$reason}',
         ]),
         'noAttempts' => get_string('noactiveattempts', 'quizaccess_cdexamsave'),
+        'noFilteredAttempts' => get_string('nofilteredattempts', 'quizaccess_cdexamsave'),
         'noIncidents' => get_string('noincidents', 'quizaccess_cdexamsave'),
         'pollError' => get_string('pollerror', 'quizaccess_cdexamsave'),
     ],
@@ -112,8 +118,11 @@ echo html_writer::tag('button', get_string('enablenotifications', 'quizaccess_cd
     'class' => 'btn btn-outline-secondary',
 ]);
 if (has_capability('quizaccess/cdexamsave:exportreport', $context)) {
-    echo html_writer::link($exporturl, get_string('exportcsv', 'quizaccess_cdexamsave'), [
+    echo html_writer::link($summaryexporturl, get_string('exportsummarycsv', 'quizaccess_cdexamsave'), [
         'class' => 'btn btn-primary',
+    ]);
+    echo html_writer::link($incidentexporturl, get_string('exportincidentscsv', 'quizaccess_cdexamsave'), [
+        'class' => 'btn btn-outline-primary',
     ]);
 }
 echo html_writer::end_div();
@@ -127,6 +136,7 @@ echo html_writer::div('', 'alert alert-danger d-none', [
 $cards = [
     'active' => 'activeattempts',
     'attention' => 'attentionnow',
+    'review' => 'reviewpriority',
     'connected' => 'connectedattempts',
     'incidents' => 'totalincidents',
 ];
@@ -145,11 +155,39 @@ foreach ($cards as $id => $stringkey) {
 echo html_writer::end_div();
 
 echo html_writer::tag('h3', get_string('participants', 'quizaccess_cdexamsave'), ['class' => 'mt-4']);
+echo html_writer::start_div('cdexamsave-filters');
+echo html_writer::tag('label', get_string('searchattempts', 'quizaccess_cdexamsave'), [
+    'for' => 'cdexamsave-search',
+    'class' => 'sr-only',
+]);
+echo html_writer::empty_tag('input', [
+    'type' => 'search',
+    'id' => 'cdexamsave-search',
+    'class' => 'form-control',
+    'placeholder' => get_string('searchattemptsplaceholder', 'quizaccess_cdexamsave'),
+]);
+echo html_writer::tag('label', get_string('filterlabel', 'quizaccess_cdexamsave'), [
+    'for' => 'cdexamsave-filter',
+    'class' => 'sr-only',
+]);
+echo html_writer::select([
+    'all' => get_string('filterall', 'quizaccess_cdexamsave'),
+    'review' => get_string('filterreview', 'quizaccess_cdexamsave'),
+    'attention' => get_string('filterattention', 'quizaccess_cdexamsave'),
+    'disconnected' => get_string('filterdisconnected', 'quizaccess_cdexamsave'),
+], 'cdexamsave-filter', 'all', false, [
+    'id' => 'cdexamsave-filter',
+    'class' => 'custom-select',
+]);
+echo html_writer::end_div();
 echo html_writer::start_div('table-responsive');
 echo html_writer::start_tag('table', ['class' => 'table table-striped cdexamsave-table']);
 echo html_writer::start_tag('thead');
 echo html_writer::start_tag('tr');
-foreach (['student', 'attempt', 'connection', 'focusstate', 'incidentcount', 'totaltimeaway', 'lastheartbeat'] as $key) {
+foreach (
+    ['student', 'attempt', 'connection', 'focusstate', 'reviewpriority', 'incidentcount', 'totaltimeaway', 'lastheartbeat']
+    as $key
+) {
     echo html_writer::tag('th', get_string($key, 'quizaccess_cdexamsave'), ['scope' => 'col']);
 }
 echo html_writer::end_tag('tr');
@@ -172,6 +210,7 @@ echo html_writer::tag('tbody', '', ['id' => 'cdexamsave-incidents-body']);
 echo html_writer::end_tag('table');
 echo html_writer::end_div();
 
+echo html_writer::div(get_string('reviewdisclaimer', 'quizaccess_cdexamsave'), 'alert alert-info mt-4');
 echo html_writer::div(get_string('privacywarning', 'quizaccess_cdexamsave'), 'alert alert-light mt-4');
 echo html_writer::tag('noscript', get_string('noscript', 'quizaccess_cdexamsave'), ['class' => 'alert alert-warning']);
 echo html_writer::end_div();

@@ -20,7 +20,7 @@ CD ExamFocus is a quiz access-rule plugin for Moodle. When enabled for a quiz, i
 
 Leaving the active exam window is a relevant indicator that a student may be consulting AI or another unauthorised external resource. CD ExamFocus provides evidence of those focus changes while avoiding camera capture, screen recording and third-party proctoring. A result with no detected focus-loss incidents means that the monitored quiz window remained active according to the browser signals received; it does not guarantee that AI was not used. A second device, an integrated browser assistant, an operating-system overlay, prepared material or client-side interference may remain invisible.
 
-The report displays active attempts, current focus state, connection status, incident count, accumulated time away and recent incident details. Authorised staff can export the visible incident history as CSV. Separate-group restrictions and dedicated report/export capabilities are enforced on the server.
+The report displays active attempts, current focus state, connection status, incident count, accumulated time away, configurable review priority and recent incident details. Staff can search and filter the cohort, export an all-attempt summary (including zero-incident attempts), or export detailed incidents. Separate-group restrictions and dedicated report/export capabilities are enforced on the server.
 
 CD ExamFocus is designed as a monitoring and deterrence aid. It is not a locked browser and must not be represented as one. A standard browser cannot prevent application switching, identify the destination tab or application, detect another device, or make an unmanaged device tamper-proof. Focus incidents may also result from operating-system dialogs, accessibility tools, notifications, connectivity problems or mobile background suspension. Records are indicators for human review, not automatic proof of misconduct.
 
@@ -34,7 +34,8 @@ No external service, subscription or API key is required. Data remains inside th
 - Optional student notice after returning to the quiz.
 - Teacher report with automatic refresh and optional browser notifications.
 - Current connection and focus state for in-progress attempts.
-- Incident history and CSV export.
+- Search, operational filters and neutral review-priority thresholds.
+- Per-attempt summary and detailed incident CSV exports.
 - Separate-groups support and dedicated Moodle capabilities.
 - Retry and deduplication controls for intermittent network conditions.
 - Configurable retention with scheduled cleanup.
@@ -99,17 +100,12 @@ When reporting a problem, include the Moodle version, PHP version, database engi
 
 GNU General Public License v3 or later.
 
-## Release notes — 1.0.2
+## Release notes — 1.0.3
 
-- First stable Marketplace submission under the **CD ExamFocus** public brand.
-- Stable technical component retained as `quizaccess_cdexamsave` for installation and upgrade compatibility.
-- Professional visual identity and Marketplace artwork.
-- Explicit, evidence-based positioning for AI-resource indicators without claiming an AI-use guarantee.
-- Focus-loss collector with grace period, retry and deduplication.
-- Student return notice.
-- Group-aware live teacher report and CSV export.
-- Retention task, Privacy API, capabilities and quiz-setting backup/restore.
-- English Marketplace interface and bilingual English/Spanish documentation.
-- Bilingual administration, publication and privacy documentation.
+- Moodle-standard AJAX external functions for student signals and live reporting.
+- Beacon/keepalive delivery with retry and deduplication.
+- Searchable, filterable group-aware report with neutral review priority.
+- Attempt-summary CSV including zero-incident attempts, plus detailed incident CSV.
+- Expanded automated tests and updated bilingual operational guidance.
 
 Publication status: stable initial release for Moodle 4.5. Broader browser, database and Moodle-version claims remain limited to environments actually tested.
