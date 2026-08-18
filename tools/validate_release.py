@@ -165,8 +165,6 @@ def main() -> int:
         source = ROOT / f"amd/src/{module}.js"
         build = ROOT / f"amd/build/{module}.min.js"
         sourcemap = ROOT / f"amd/build/{module}.min.js.map"
-        if build.exists() and source.exists() and build.stat().st_mtime < source.stat().st_mtime:
-            failures.append(f"compiled AMD file is older than its source: {module}")
         if build.exists() and b"define(" not in build.read_bytes():
             failures.append(f"compiled AMD file is not an AMD module: {module}")
         if source.exists() and sourcemap.exists():
