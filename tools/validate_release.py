@@ -171,11 +171,7 @@ def main() -> int:
             try:
                 mapdata = json.loads(sourcemap.read_text(encoding="utf-8"))
                 mappedsource = mapdata["sourcesContent"][0]
-                expectedsource = source.read_text(encoding="utf-8").replace(
-                    "define(",
-                    f'define("quizaccess_cdexamsave/{module}",',
-                    1,
-                )
+                expectedsource = source.read_text(encoding="utf-8")
                 if mappedsource != expectedsource:
                     failures.append(f"compiled AMD source map does not match source: {module}")
             except (json.JSONDecodeError, KeyError, IndexError, OSError) as error:

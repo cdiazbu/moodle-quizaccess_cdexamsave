@@ -184,10 +184,16 @@ echo html_writer::start_div('table-responsive');
 echo html_writer::start_tag('table', ['class' => 'table table-striped cdexamsave-table']);
 echo html_writer::start_tag('thead');
 echo html_writer::start_tag('tr');
-foreach (
-    ['student', 'attempt', 'connection', 'focusstate', 'reviewpriority', 'incidentcount', 'totaltimeaway', 'lastheartbeat']
-    as $key
-) {
+foreach ([
+    'student',
+    'attempt',
+    'connection',
+    'focusstate',
+    'reviewpriority',
+    'incidentcount',
+    'totaltimeaway',
+    'lastheartbeat',
+] as $key) {
     echo html_writer::tag('th', get_string($key, 'quizaccess_cdexamsave'), ['scope' => 'col']);
 }
 echo html_writer::end_tag('tr');
