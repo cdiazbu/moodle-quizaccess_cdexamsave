@@ -51,7 +51,7 @@ No external service, subscription or API key is required. Data remains inside th
 - Moodle cron must run for retention cleanup.
 - No additional Moodle plugin or external service is required.
 
-The initial public release targets Moodle 4.5 and later. The technical component name remains unchanged so existing installations on Moodle 4.5 can upgrade without losing their settings or monitoring data.
+The public release targets Moodle 4.5 and later. The technical component name remains unchanged so existing installations on Moodle 4.5 can upgrade without losing their settings or monitoring data.
 
 ## Installation
 
@@ -108,4 +108,4 @@ GNU General Public License v3 or later.
 - Attempt-summary CSV including zero-incident attempts, plus detailed incident CSV.
 - Expanded automated tests and updated bilingual operational guidance.
 
-Publication status: stable initial release for Moodle 4.5. Broader browser, database and Moodle-version claims remain limited to environments actually tested.
+Publication status: stable update for Moodle 4.5. Broader browser, database and Moodle-version claims remain limited to environments actually tested.

@@ -3,9 +3,11 @@
 
 from __future__ import annotations
 
+import json
 import re
 import sys
 import xml.etree.ElementTree as ET
+import zlib
 from pathlib import Path
 
 
@@ -27,9 +29,45 @@ REQUIRED = {
     "classes/external/get_live_data.php",
     "pix/icon.png",
     "README.md",
+    "tools/build_release.py",
 }
 
+FORBIDDEN = {"collector.php", "live.php"}
+
 TEXT_SUFFIXES = {".cff", ".css", ".js", ".json", ".md", ".php", ".py", ".svg", ".xml", ".yml", ".yaml"}
+
+
+def validate_png(path: Path) -> str | None:
+    """Return an error for a truncated or corrupt PNG, otherwise None."""
+    data = path.read_bytes()
+    if not data.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "invalid PNG signature"
+
+    offset = 8
+    seen_iend = False
+    while offset < len(data):
+        if offset + 12 > len(data):
+            return "truncated PNG chunk header"
+        length = int.from_bytes(data[offset : offset + 4], "big")
+        chunkend = offset + 12 + length
+        if chunkend > len(data):
+            return "truncated PNG chunk data"
+        chunktype = data[offset + 4 : offset + 8]
+        chunkdata = data[offset + 8 : offset + 8 + length]
+        expectedcrc = int.from_bytes(data[offset + 8 + length : chunkend], "big")
+        actualcrc = zlib.crc32(chunktype + chunkdata) & 0xFFFFFFFF
+        if actualcrc != expectedcrc:
+            return f"invalid PNG CRC in {chunktype.decode('ascii', errors='replace')} chunk"
+        offset = chunkend
+        if chunktype == b"IEND":
+            seen_iend = True
+            break
+
+    if not seen_iend:
+        return "missing PNG IEND chunk"
+    if offset != len(data):
+        return "unexpected bytes after PNG IEND chunk"
+    return None
 
 
 def language_keys(path: Path) -> set[str]:
@@ -41,11 +79,17 @@ def language_keys(path: Path) -> set[str]:
 def main() -> int:
     """Run release checks and return a process exit code."""
     failures: list[str] = []
-    all_files = [path for path in ROOT.rglob("*") if path.is_file()]
+    all_files = [
+        path
+        for path in ROOT.rglob("*")
+        if path.is_file() and ".git" not in path.relative_to(ROOT).parts
+    ]
     relative_files = {str(path.relative_to(ROOT)) for path in all_files}
 
     for required in sorted(REQUIRED - relative_files):
         failures.append(f"missing required file: {required}")
+    for forbidden in sorted(FORBIDDEN & relative_files):
+        failures.append(f"obsolete custom AJAX endpoint is still present: {forbidden}")
 
     try:
         install_tree = ET.parse(ROOT / "db/install.xml")
@@ -74,6 +118,10 @@ def main() -> int:
             failures.append(f"CRLF line endings found: {path.relative_to(ROOT)}")
         if path.name in {".DS_Store", "Thumbs.db"} or "__pycache__" in path.parts:
             failures.append(f"accidental package file: {path.relative_to(ROOT)}")
+        if path.suffix.lower() == ".png":
+            pngerror = validate_png(path)
+            if pngerror:
+                failures.append(f"corrupt PNG {path.relative_to(ROOT)}: {pngerror}")
 
     enkeys = language_keys(ROOT / "lang/en/quizaccess_cdexamsave.php")
     spanish = ROOT / "lang/es/quizaccess_cdexamsave.php"
@@ -83,6 +131,15 @@ def main() -> int:
             failures.append(f"Spanish translation missing: {key}")
         for key in sorted(eskeys - enkeys):
             failures.append(f"English translation missing: {key}")
+
+    languagepacks = sorted(
+        path.name for path in (ROOT / "lang").iterdir() if path.is_dir() and path.name != "en"
+    )
+    if languagepacks:
+        failures.append(
+            "plugin ZIP must ship only lang/en; submit translations through AMOS: "
+            + ", ".join(languagepacks)
+        )
 
     referenced: set[str] = set()
     get_string_pattern = re.compile(
@@ -99,14 +156,32 @@ def main() -> int:
         failures.append("version.php component is incorrect")
     if "$plugin->requires = 2024100700;" not in version:
         failures.append("Moodle 4.5 minimum version marker is missing")
+    if not re.search(r"\$plugin->version\s*=\s*\d{10};", version):
+        failures.append("version.php does not contain a 10-digit build number")
+    if "$plugin->maturity = MATURITY_STABLE;" not in version:
+        failures.append("version.php is not marked as a stable release")
 
     for module in ("monitor", "live_report"):
         source = ROOT / f"amd/src/{module}.js"
         build = ROOT / f"amd/build/{module}.min.js"
+        sourcemap = ROOT / f"amd/build/{module}.min.js.map"
         if build.exists() and source.exists() and build.stat().st_mtime < source.stat().st_mtime:
             failures.append(f"compiled AMD file is older than its source: {module}")
         if build.exists() and b"define(" not in build.read_bytes():
             failures.append(f"compiled AMD file is not an AMD module: {module}")
+        if source.exists() and sourcemap.exists():
+            try:
+                mapdata = json.loads(sourcemap.read_text(encoding="utf-8"))
+                mappedsource = mapdata["sourcesContent"][0]
+                expectedsource = source.read_text(encoding="utf-8").replace(
+                    "define(",
+                    f'define("quizaccess_cdexamsave/{module}",',
+                    1,
+                )
+                if mappedsource != expectedsource:
+                    failures.append(f"compiled AMD source map does not match source: {module}")
+            except (json.JSONDecodeError, KeyError, IndexError, OSError) as error:
+                failures.append(f"invalid AMD source map for {module}: {error}")
 
     if failures:
         print("CD ExamFocus release validation failed:")

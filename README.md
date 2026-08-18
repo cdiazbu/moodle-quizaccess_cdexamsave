@@ -55,7 +55,7 @@ Every incident requires contextual human review. Do not apply an automatic acade
 - Working Moodle cron for scheduled retention cleanup.
 - HTTPS strongly recommended in production.
 
-The initial public release targets Moodle 4.5 and later. The technical component name remains unchanged so existing CDexamSave installations on Moodle 4.5 can upgrade without losing their settings or monitoring data.
+The public release targets Moodle 4.5 and later. The technical component name remains unchanged so existing CDexamSave installations on Moodle 4.5 can upgrade without losing their settings or monitoring data.
 
 ## Installation
 
@@ -117,6 +117,12 @@ Run the structural validator:
 python3 tools/validate_release.py
 ```
 
+Build a deterministic Marketplace ZIP with one top-level `cdexamsave/` directory:
+
+```bash
+python3 tools/build_release.py
+```
+
 From a Moodle development installation:
 
 ```bash
@@ -131,6 +137,7 @@ npx grunt amd --root=mod/quiz/accessrule/cdexamsave
 ```
 
 Real-browser and real-Moodle acceptance requirements are documented in `TESTING.md` and `docs/RELEASE_CHECKLIST.md`.
+The repository workflow validates Moodle 4.5 with PHP 8.1–8.3 against MariaDB and PostgreSQL on every push and pull request.
 
 ## Documentation
 

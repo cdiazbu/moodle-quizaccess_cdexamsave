@@ -6,6 +6,7 @@
 - Moodle PHPUnit tests for UUID validation and untrusted reason normalisation.
 - Moodle PHPUnit coverage for the permission-aware live AJAX external function and its declared return schema.
 - Package validator for XML well-formedness, required plugin files, language parity, string references, AMD build parity and forbidden accidental files.
+- Dependency-free PNG integrity checks and deterministic release-ZIP construction from Git-managed files.
 - JavaScript syntax parsing for both source and compiled AMD modules.
 - PHP syntax parsing for all plugin PHP files when PHP CLI is available.
 

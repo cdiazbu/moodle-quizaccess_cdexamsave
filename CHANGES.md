@@ -1,6 +1,6 @@
 # Change log
 
-## 1.0.3 — 2026-08-15
+## 1.0.3 — 2026-08-18
 
 - Replaced the custom student collector and live-report endpoints with Moodle AJAX external functions registered in `db/services.php` and consumed through `core/ajax`.
 - Preserved beacon and keepalive delivery for page lifecycle signals while routing them through Moodle's standard external-service endpoint.
@@ -9,6 +9,8 @@
 - Added a new attempt-summary CSV covering all non-preview attempts, including attempts with zero incidents, alongside the detailed incident export.
 - Added explicit interface guidance that review priority is a triage aid rather than proof of misconduct.
 - Expanded automated coverage for review thresholds and the permission-aware live external function.
+- Strengthened the public Moodle Plugin CI workflow across PHP 8.1–8.3, MariaDB and PostgreSQL on Moodle 4.5.
+- Added deterministic package construction and PNG-integrity checks for release assets.
 
 ## 1.0.2 — 2026-07-31
 

@@ -15,6 +15,7 @@ Use this document to record the evidence behind compatibility and quality claims
 ## B. Static and package checks
 
 - [x] `tools/validate_release.py` passes.
+- [x] Bundled PNG files have complete chunks and valid CRC values.
 - [ ] Every PHP file passes `php -l` using a PHP version supported by the target Moodle release.
 - [ ] Moodle Code Checker/PHPCS passes or each remaining warning is reviewed and documented.
 - [ ] Moodle PHPDoc checks pass.

@@ -108,4 +108,4 @@ GNU General Public License v3 o posterior.
 - CSV de resumen con intentos sin incidentes y CSV detallado de incidencias.
 - Más pruebas automatizadas y guías operativas bilingües actualizadas.
 
-Estado de publicación: versión inicial estable para Moodle 4.5. Las afirmaciones de compatibilidad más amplias se limitarán a los entornos realmente comprobados.
+Estado de publicación: actualización estable para Moodle 4.5. Las afirmaciones de compatibilidad más amplias se limitarán a los entornos realmente comprobados.
