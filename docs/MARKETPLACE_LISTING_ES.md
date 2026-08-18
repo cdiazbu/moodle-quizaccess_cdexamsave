@@ -20,7 +20,7 @@ CD ExamFocus es una regla de acceso para los cuestionarios de Moodle. Cuando se 
 
 Abandonar la ventana activa del examen es un indicador relevante de que el alumno puede estar consultando IA u otro recurso externo no autorizado. CD ExamFocus aporta evidencias de esos cambios de foco sin capturar la cámara, grabar la pantalla ni depender de servicios de supervisión de terceros. Un intento sin pérdidas de foco detectadas significa que la ventana supervisada permaneció activa según las señales recibidas del navegador; no garantiza que no se utilizara IA. Pueden quedar fuera de su alcance un segundo dispositivo, un asistente integrado en el navegador, una superposición del sistema operativo, material preparado o la manipulación del cliente.
 
-El informe muestra los intentos activos, el estado actual del foco, la conexión, el número de incidentes, el tiempo total fuera y los incidentes recientes. El personal autorizado puede exportar el historial visible en CSV. Las restricciones de grupos separados y los permisos específicos de consulta y exportación se comprueban en el servidor.
+El informe muestra los intentos activos, el estado del foco, la conexión, el número de incidentes, el tiempo total fuera, una prioridad configurable de revisión y los incidentes recientes. El personal puede buscar y filtrar el grupo, exportar un resumen de todos los intentos (incluidos los que no tienen incidentes) o descargar el detalle. Las restricciones de grupos separados y los permisos se comprueban en el servidor.
 
 CD ExamFocus es una ayuda para supervisar y disuadir, no un navegador bloqueado. Un navegador normal no puede impedir el cambio de aplicación, identificar la pestaña o programa de destino, detectar el uso de otro dispositivo ni garantizar que un equipo no gestionado sea inmune a manipulaciones. También pueden producir incidentes legítimos por diálogos del sistema operativo, herramientas de accesibilidad, notificaciones, problemas de conexión o suspensión en segundo plano. Los registros son indicios que requieren revisión humana, no una prueba automática de conducta indebida.
 
@@ -34,7 +34,8 @@ No requiere servicios externos, suscripciones ni claves API. Los datos permanece
 - Aviso opcional al alumno después de regresar.
 - Informe docente con actualización automática y avisos opcionales del navegador.
 - Estado de conexión y foco de los intentos en curso.
-- Historial de incidentes y exportación CSV.
+- Búsqueda, filtros operativos y umbrales neutrales para priorizar revisiones.
+- Resumen por intento y detalle de incidentes en CSV.
 - Compatibilidad con grupos separados y capacidades específicas de Moodle.
 - Reintentos y deduplicación ante problemas temporales de red.
 - Conservación configurable y borrado mediante tarea programada.
@@ -99,17 +100,12 @@ Al comunicar un problema, indica Moodle, PHP, base de datos, navegador y sistema
 
 GNU General Public License v3 o posterior.
 
-## Novedades — 1.0.2
+## Novedades — 1.0.3
 
-- Primera versión estable enviada a Marketplace bajo la marca **CD ExamFocus**.
-- Componente técnico estable `quizaccess_cdexamsave` para conservar la compatibilidad de instalación y actualización.
-- Identidad visual profesional y recursos gráficos para Marketplace.
-- Posicionamiento verificable frente al acceso a IA, sin afirmar una garantía imposible sobre su uso.
-- Registro de pérdidas de foco con margen, reintentos y deduplicación.
-- Aviso al alumno al regresar.
-- Informe docente compatible con grupos y exportación CSV.
-- Tarea de conservación, API de privacidad, permisos y copia/restauración de ajustes.
-- Interfaz inicial de Marketplace en inglés y documentación bilingüe en inglés y español.
-- Documentación bilingüe de administración, publicación y privacidad.
+- Funciones AJAX externas estándar de Moodle para señales e informe en directo.
+- Envío beacon/keepalive con reintento y deduplicación.
+- Informe por grupos con búsqueda, filtros y prioridad neutral de revisión.
+- CSV de resumen con intentos sin incidentes y CSV detallado de incidencias.
+- Más pruebas automatizadas y guías operativas bilingües actualizadas.
 
-Estado de publicación: versión inicial estable para Moodle 4.5. Las afirmaciones de compatibilidad más amplias se limitarán a los entornos realmente comprobados.
+Estado de publicación: actualización estable para Moodle 4.5. Las afirmaciones de compatibilidad más amplias se limitarán a los entornos realmente comprobados.

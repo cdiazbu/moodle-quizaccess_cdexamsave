@@ -1,5 +1,5 @@
 name: Bug report
-description: Report a reproducible CDexamSave problem without personal or assessment data.
+description: Report a reproducible CD ExamFocus problem without personal or assessment data.
 title: "[Bug]: "
 labels:
   - bug
@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for helping improve CDexamSave. Do not include student names, quiz content, session identifiers, credentials, database exports or unredacted logs. Report suspected vulnerabilities privately as described in SECURITY.md.
+        Thank you for helping improve CD ExamFocus. Do not include student names, quiz content, session identifiers, credentials, database exports or unredacted logs. Report suspected vulnerabilities privately as described in SECURITY.md.
   - type: input
     id: moodle
     attributes:
@@ -18,8 +18,8 @@ body:
   - type: input
     id: plugin
     attributes:
-      label: CDexamSave version
-      placeholder: "1.0.2-rc1"
+      label: CD ExamFocus version
+      placeholder: "1.0.3"
     validations:
       required: true
   - type: input

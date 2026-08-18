@@ -69,7 +69,8 @@
 }
 
 .cdexamsave-live-pill,
-.cdexamsave-status {
+.cdexamsave-status,
+.cdexamsave-review {
     display: inline-block;
     padding: .25rem .55rem;
     border-radius: 999px;
@@ -104,7 +105,7 @@
 
 .cdexamsave-summary {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 1rem;
     margin: 1rem 0 1.5rem;
 }
@@ -121,6 +122,11 @@
 .cdexamsave-card-attention {
     border-color: #dc3545;
     background: #fff5f5;
+}
+
+.cdexamsave-card-review {
+    border-color: #ffc107;
+    background: #fffaf0;
 }
 
 .cdexamsave-card-value,
@@ -161,7 +167,25 @@
     color: #41464b;
 }
 
+.cdexamsave-review-recommended {
+    background: #fff3cd;
+    color: #664d03;
+}
+
+.cdexamsave-review-normal {
+    background: #e2e3e5;
+    color: #41464b;
+}
+
+.cdexamsave-filters {
+    display: grid;
+    grid-template-columns: minmax(14rem, 2fr) minmax(14rem, 1fr);
+    gap: .75rem;
+    margin: .75rem 0 1rem;
+}
+
 .cdexamsave-participant-attention,
+.cdexamsave-participant-review,
 .cdexamsave-incident-active {
     --table-accent-bg: #fff1f2;
 }
@@ -173,6 +197,10 @@
 
     .cdexamsave-toolbar-actions .btn {
         flex: 1 1 100%;
+    }
+
+    .cdexamsave-filters {
+        grid-template-columns: 1fr;
     }
 }
 

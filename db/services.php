@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for CD ExamFocus.
+ * AJAX-enabled external functions for CD ExamFocus.
  *
  * @package    quizaccess_cdexamsave
  * @copyright  2026 Carlos Díaz Bueno
@@ -24,8 +24,20 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'quizaccess_cdexamsave';
-$plugin->version = 2026081800;
-$plugin->requires = 2024100700; // Moodle 4.5.
-$plugin->maturity = MATURITY_STABLE;
-$plugin->release = '1.0.3';
+$functions = [
+    'quizaccess_cdexamsave_record_signal' => [
+        'classname' => 'quizaccess_cdexamsave\\external\\record_signal',
+        'description' => 'Validate and record one browser focus-monitoring signal.',
+        'type' => 'write',
+        'ajax' => true,
+        'loginrequired' => true,
+    ],
+    'quizaccess_cdexamsave_get_live_data' => [
+        'classname' => 'quizaccess_cdexamsave\\external\\get_live_data',
+        'description' => 'Return a group-aware live monitoring snapshot for authorised staff.',
+        'type' => 'read',
+        'ajax' => true,
+        'loginrequired' => true,
+        'capabilities' => 'quizaccess/cdexamsave:viewreport',
+    ],
+];

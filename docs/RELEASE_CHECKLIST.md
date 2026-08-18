@@ -15,6 +15,7 @@ Use this document to record the evidence behind compatibility and quality claims
 ## B. Static and package checks
 
 - [x] `tools/validate_release.py` passes.
+- [x] Bundled PNG files have complete chunks and valid CRC values.
 - [ ] Every PHP file passes `php -l` using a PHP version supported by the target Moodle release.
 - [ ] Moodle Code Checker/PHPCS passes or each remaining warning is reviewed and documented.
 - [ ] Moodle PHPDoc checks pass.
@@ -45,6 +46,7 @@ Environment: `[Moodle build]` / `[PHP]` / `[DB and version]` / `[OS]` / `[date]`
 - [ ] Shorter-than-grace change leaves no persistent incident.
 - [ ] Next/previous question, autosave, summary and final submission do not create persistent false incidents.
 - [ ] Temporary loss of connectivity retries without duplicate incidents.
+- [ ] Student signals use the registered Moodle AJAX external function; no plugin-specific collector endpoint is called.
 - [ ] Page close/suspension behaviour is documented and consistent with the browser.
 - [ ] Maximum-incident protection is enforced.
 
@@ -57,7 +59,10 @@ Environment: `[Moodle build]` / `[PHP]` / `[DB and version]` / `[OS]` / `[date]`
 - [ ] Separate groups expose only permitted participants.
 - [ ] Live refresh, manual refresh and pause/resume work.
 - [ ] Optional browser alerts work and remain opt-in.
-- [ ] CSV matches the visible authorised scope and cannot trigger spreadsheet formula injection.
+- [ ] Search and all/review/focus/disconnected filters produce the expected participant rows.
+- [ ] Review priority changes at both configured thresholds and is labelled as a human-review aid.
+- [ ] Both CSV files match the authorised scope and cannot trigger spreadsheet formula injection.
+- [ ] Attempt summary includes completed/in-progress attempts with zero incidents.
 - [ ] Report output is escaped and tested with unusual user names.
 
 ## F. Privacy, lifecycle and resilience
