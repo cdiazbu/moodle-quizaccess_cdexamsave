@@ -1,0 +1,68 @@
+name: Publish CD ExamFocus 1.0.4
+
+on:
+  schedule:
+    - cron: '0 14 22 8 *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-cd-examfocus-1.0.4
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish verified 1.0.4 release
+    if: github.repository == 'cdiazbu/moodle-quizaccess_cdexamsave'
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Confirm one-time publication window
+        id: window
+        shell: bash
+        run: |
+          if [[ "$(date -u +%Y-%m-%d)" == "2026-08-22" ]]; then
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "Outside the authorised 2026-08-22 publication window; no release will be created."
+          fi
+
+      - name: Check out the verified main branch
+        if: steps.window.outputs.publish == 'true'
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Validate release metadata and package tree
+        if: steps.window.outputs.publish == 'true'
+        shell: bash
+        run: |
+          grep -F '$plugin->version = 2026082200;' version.php
+          grep -F '$plugin->release = '\''1.0.4'\'';' version.php
+          python3 tools/validate_release.py
+
+      - name: Build deterministic Marketplace package
+        if: steps.window.outputs.publish == 'true'
+        shell: bash
+        run: |
+          python3 tools/build_release.py --output "$RUNNER_TEMP/CD-ExamFocus-1.0.4.zip"
+          echo 'c1595f9a8d52cdf549c228067aec59b351b495595ece2f04932c35c62503b7ce  '"$RUNNER_TEMP/CD-ExamFocus-1.0.4.zip" | sha256sum --check --strict
+          unzip -t "$RUNNER_TEMP/CD-ExamFocus-1.0.4.zip"
+
+      - name: Create GitHub Release
+        if: steps.window.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          if gh release view v1.0.4 >/dev/null 2>&1; then
+            echo "Release v1.0.4 already exists; leaving it unchanged."
+            exit 0
+          fi
+          gh release create v1.0.4 "$RUNNER_TEMP/CD-ExamFocus-1.0.4.zip" \
+            --target "$GITHUB_SHA" \
+            --title "CD ExamFocus 1.0.4" \
+            --notes "Stable Moodle 4.5 maintenance release dated 22 August 2026. It preserves the privacy-first monitoring, Moodle-standard AJAX services, review workflow, live reporting and CSV exports introduced in 1.0.3, while aligning release metadata and adding automatic consistency validation. Review priority remains a workflow aid and is not proof of misconduct."
