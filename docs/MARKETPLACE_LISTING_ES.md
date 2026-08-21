@@ -100,12 +100,12 @@ Al comunicar un problema, indica Moodle, PHP, base de datos, navegador y sistema
 
 GNU General Public License v3 o posterior.
 
-## Novedades — 1.0.3
+## Novedades — 1.0.4
 
-- Funciones AJAX externas estándar de Moodle para señales e informe en directo.
-- Envío beacon/keepalive con reintento y deduplicación.
-- Informe por grupos con búsqueda, filtros y prioridad neutral de revisión.
-- CSV de resumen con intentos sin incidentes y CSV detallado de incidencias.
-- Más pruebas automatizadas y guías operativas bilingües actualizadas.
+- Actualiza los metadatos de la compilación estable para su publicación en Marketplace el 22 de agosto de 2026.
+- Mantiene las funciones AJAX estándar de Moodle, el envío beacon/keepalive y la deduplicación.
+- Incluye el informe por grupos con búsqueda, filtros y prioridad neutral de revisión.
+- Incluye los CSV de resumen de intentos y de detalle de incidencias.
+- Añade validación automática para mantener coherentes los metadatos de la entrega.
 
-Estado de publicación: actualización estable para Moodle 4.5. Las afirmaciones de compatibilidad más amplias se limitarán a los entornos realmente comprobados.
+Estado de publicación: actualización estable de mantenimiento para Moodle 4.5. Las afirmaciones de compatibilidad más amplias se limitarán a los entornos realmente comprobados.

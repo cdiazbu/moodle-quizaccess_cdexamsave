@@ -100,12 +100,12 @@ When reporting a problem, include the Moodle version, PHP version, database engi
 
 GNU General Public License v3 or later.
 
-## Release notes — 1.0.3
+## Release notes — 1.0.4
 
-- Moodle-standard AJAX external functions for student signals and live reporting.
-- Beacon/keepalive delivery with retry and deduplication.
-- Searchable, filterable group-aware report with neutral review priority.
-- Attempt-summary CSV including zero-incident attempts, plus detailed incident CSV.
-- Expanded automated tests and updated bilingual operational guidance.
+- Refreshes the stable Marketplace build metadata for 22 August 2026.
+- Preserves Moodle-standard AJAX external functions, beacon/keepalive delivery and deduplication.
+- Includes the searchable, filterable group-aware report with neutral review priority.
+- Includes attempt-summary and detailed incident CSV exports.
+- Adds automated validation to keep release metadata consistent across the package.
 
-Publication status: stable update for Moodle 4.5. Broader browser, database and Moodle-version claims remain limited to environments actually tested.
+Publication status: stable maintenance update for Moodle 4.5. Broader browser, database and Moodle-version claims remain limited to environments actually tested.

@@ -156,10 +156,37 @@ def main() -> int:
         failures.append("version.php component is incorrect")
     if "$plugin->requires = 2024100700;" not in version:
         failures.append("Moodle 4.5 minimum version marker is missing")
-    if not re.search(r"\$plugin->version\s*=\s*\d{10};", version):
+    buildmatch = re.search(r"\$plugin->version\s*=\s*(\d{10});", version)
+    releasematch = re.search(r"\$plugin->release\s*=\s*'([^']+)';", version)
+    if not buildmatch:
         failures.append("version.php does not contain a 10-digit build number")
+    if not releasematch:
+        failures.append("version.php does not contain a release name")
     if "$plugin->maturity = MATURITY_STABLE;" not in version:
         failures.append("version.php is not marked as a stable release")
+
+    if buildmatch and releasematch:
+        builddate = buildmatch.group(1)[:8]
+        releasedate = f"{builddate[:4]}-{builddate[4:6]}-{builddate[6:8]}"
+        releasename = releasematch.group(1)
+
+        try:
+            citation = (ROOT / "CITATION.cff").read_text(encoding="utf-8")
+            citationversion = re.search(r"^version:\s*([^\s#]+)\s*$", citation, re.MULTILINE)
+            citationdate = re.search(r"^date-released:\s*([^\s#]+)\s*$", citation, re.MULTILINE)
+            if not citationversion or citationversion.group(1) != releasename:
+                failures.append("CITATION.cff version does not match version.php release")
+            if not citationdate or citationdate.group(1) != releasedate:
+                failures.append("CITATION.cff release date does not match version.php build date")
+        except OSError as error:
+            failures.append(f"cannot read CITATION.cff: {error}")
+
+        try:
+            changes = (ROOT / "CHANGES.md").read_text(encoding="utf-8")
+            if f"## {releasename} — {releasedate}" not in changes:
+                failures.append("CHANGES.md latest release heading does not match version.php")
+        except OSError as error:
+            failures.append(f"cannot read CHANGES.md: {error}")
 
     for module in ("monitor", "live_report"):
         source = ROOT / f"amd/src/{module}.js"
