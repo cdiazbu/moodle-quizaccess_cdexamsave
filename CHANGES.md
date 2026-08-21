@@ -1,5 +1,11 @@
 # Change log
 
+## 1.0.4 — 2026-08-22
+
+- Refreshed the stable release metadata and Moodle build number for the 22 August 2026 Marketplace publication.
+- Added release validation that keeps `version.php`, `CITATION.cff` and this change log aligned.
+- Retained the tested Moodle 4.5 feature set and all privacy-first monitoring improvements from 1.0.3 without changing stored data or upgrade behaviour.
+
 ## 1.0.3 — 2026-08-18
 
 - Replaced the custom student collector and live-report endpoints with Moodle AJAX external functions registered in `db/services.php` and consumed through `core/ajax`.
