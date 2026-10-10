@@ -104,7 +104,7 @@ class report_service {
                 'attempt'
             );
             $sessionrecords = $DB->get_records_select(
-                'quizaccess_cdexamctrl_sess',
+                'quizaccess_cdexamcontrol_ses',
                 "attemptid {$attemptsql}",
                 $attemptparams
             );
@@ -340,7 +340,8 @@ class report_service {
                 'started' => (int) $record->timestart,
                 'startedtext' => userdate((int) $record->timestart),
                 'ended' => (int) $record->timeend,
-                'endedtext' => $active ? get_string('incidentactive', 'quizaccess_cdexamcontrol') : userdate((int) $record->timeend),
+                'endedtext' => $active ? get_string('incidentactive', 'quizaccess_cdexamcontrol') :
+                    userdate((int) $record->timeend),
                 'duration' => $duration,
                 'durationtext' => format_time($duration),
                 'active' => $active,

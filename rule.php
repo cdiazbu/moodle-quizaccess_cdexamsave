@@ -163,7 +163,7 @@ class quizaccess_cdexamcontrol extends \mod_quiz\local\access_rule_base {
         global $DB;
         $DB->delete_records('quizaccess_cdexamcontrol', ['quizid' => $quiz->id]);
         $DB->delete_records('quizaccess_cdexamcontrol_evt', ['quizid' => $quiz->id]);
-        $DB->delete_records('quizaccess_cdexamctrl_sess', ['quizid' => $quiz->id]);
+        $DB->delete_records('quizaccess_cdexamcontrol_ses', ['quizid' => $quiz->id]);
     }
 
     /**

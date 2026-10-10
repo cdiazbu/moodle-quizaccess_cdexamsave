@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 /**
  * Upgrade the independent CD Exam Control beta schema.
  *
@@ -22,8 +21,6 @@
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Add missing beta settings without touching the ExamFocus component.
@@ -36,6 +33,11 @@ function xmldb_quizaccess_cdexamcontrol_upgrade($oldversion): bool {
 
     if ($oldversion < 2026101000) {
         $dbman = $DB->get_manager();
+        $oldsession = new xmldb_table('quizaccess_cdexamctrl_sess');
+        $newsession = new xmldb_table('quizaccess_cdexamcontrol_ses');
+        if ($dbman->table_exists($oldsession) && !$dbman->table_exists($newsession)) {
+            $dbman->rename_table($oldsession, 'quizaccess_cdexamcontrol_ses');
+        }
         $table = new xmldb_table('quizaccess_cdexamcontrol');
         foreach (['requirefullscreen' => 1, 'blockshortcuts' => 0] as $name => $default) {
             $field = new xmldb_field($name, XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, $default);

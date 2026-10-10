@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 namespace quizaccess_cdexamcontrol;
 
 use quizaccess_cdexamcontrol\local\incident_service;
@@ -35,7 +34,7 @@ final class collector_test extends \advanced_testcase {
      * @return array Attempt, module and base payload.
      */
     private function fixture(): array {
-        global $DB;
+        global $DB, $PAGE;
 
         $this->resetAfterTest(true);
         $generator = $this->getDataGenerator();
@@ -60,6 +59,7 @@ final class collector_test extends \advanced_testcase {
             'eventuuid' => '123e4567-e89b-42d3-a456-426614174002',
             'reason' => 'window_blur', 'clienttime' => time(), 'duration' => 5,
         ];
+        $PAGE = new \moodle_page();
         return [$attempt, $cm, $payload];
     }
 
@@ -78,7 +78,7 @@ final class collector_test extends \advanced_testcase {
         incident_service::record($payload + ['action' => 'returned']);
         $this->assertSame(1, $DB->count_records('quizaccess_cdexamcontrol_evt', ['attemptid' => $attempt->id]));
         $event = $DB->get_record('quizaccess_cdexamcontrol_evt', ['attemptid' => $attempt->id], '*', MUST_EXIST);
-        $session = $DB->get_record('quizaccess_cdexamctrl_sess', ['attemptid' => $attempt->id], '*', MUST_EXIST);
+        $session = $DB->get_record('quizaccess_cdexamcontrol_ses', ['attemptid' => $attempt->id], '*', MUST_EXIST);
         $this->assertGreaterThan(0, (int) $event->timeend);
         $this->assertSame(0, (int) $session->focuslost);
     }
@@ -98,7 +98,7 @@ final class collector_test extends \advanced_testcase {
         $other['eventuuid'] = '123e4567-e89b-42d3-a456-426614174003';
         incident_service::record($other + ['action' => 'lost']);
         incident_service::record($payload + ['action' => 'returned']);
-        $session = $DB->get_record('quizaccess_cdexamctrl_sess', ['attemptid' => $attempt->id], '*', MUST_EXIST);
+        $session = $DB->get_record('quizaccess_cdexamcontrol_ses', ['attemptid' => $attempt->id], '*', MUST_EXIST);
         $this->assertSame(1, (int) $session->focuslost);
     }
 
@@ -117,7 +117,7 @@ final class collector_test extends \advanced_testcase {
         $newpage['pagesessionid'] = '123e4567-e89b-42d3-a456-426614174004';
         incident_service::record($newpage + ['action' => 'init']);
         incident_service::record($payload + ['action' => 'lost']);
-        $session = $DB->get_record('quizaccess_cdexamctrl_sess', ['attemptid' => $attempt->id], '*', MUST_EXIST);
+        $session = $DB->get_record('quizaccess_cdexamcontrol_ses', ['attemptid' => $attempt->id], '*', MUST_EXIST);
         $event = $DB->get_record('quizaccess_cdexamcontrol_evt', ['eventuuid' => $payload['eventuuid']], '*', MUST_EXIST);
         $this->assertGreaterThan(0, (int) $event->timeend);
         $this->assertSame($newpage['pagesessionid'], $session->pagesessionid);
@@ -168,7 +168,7 @@ final class collector_test extends \advanced_testcase {
         $payload['reason'] = 'shortcut_blocked';
         incident_service::record($payload + ['action' => 'observed']);
         $event = $DB->get_record('quizaccess_cdexamcontrol_evt', ['attemptid' => $attempt->id], '*', MUST_EXIST);
-        $session = $DB->get_record('quizaccess_cdexamctrl_sess', ['attemptid' => $attempt->id], '*', MUST_EXIST);
+        $session = $DB->get_record('quizaccess_cdexamcontrol_ses', ['attemptid' => $attempt->id], '*', MUST_EXIST);
         $this->assertSame(0, (int) $event->duration);
         $this->assertSame(0, (int) $session->focuslost);
     }
@@ -211,7 +211,7 @@ final class collector_test extends \advanced_testcase {
         incident_service::record($payload + ['action' => 'observed']);
         $past = time() - 5 * DAYSECS;
         $DB->set_field('quizaccess_cdexamcontrol_evt', 'timecreated', $past, ['attemptid' => $attempt->id]);
-        $DB->set_field('quizaccess_cdexamctrl_sess', 'timemodified', $past, ['attemptid' => $attempt->id]);
+        $DB->set_field('quizaccess_cdexamcontrol_ses', 'timemodified', $past, ['attemptid' => $attempt->id]);
         set_config('retentiondays', 1, 'quizaccess_cdexamcontrol');
         $task = new \quizaccess_cdexamcontrol\task\cleanup();
         $task->execute();
@@ -219,6 +219,33 @@ final class collector_test extends \advanced_testcase {
         $DB->set_field('quiz_attempts', 'state', 'finished', ['id' => $attempt->id]);
         $task->execute();
         $this->assertFalse($DB->record_exists('quizaccess_cdexamcontrol_evt', ['attemptid' => $attempt->id]));
-        $this->assertFalse($DB->record_exists('quizaccess_cdexamctrl_sess', ['attemptid' => $attempt->id]));
+        $this->assertFalse($DB->record_exists('quizaccess_cdexamcontrol_ses', ['attemptid' => $attempt->id]));
     }
+
+    /**
+     * The prior independent beta session table is migrated with its data intact.
+     *
+     * @covers ::record
+     * @covers \xmldb_quizaccess_cdexamcontrol_upgrade
+     * @return void
+     */
+    public function test_beta_session_table_upgrade_preserves_data(): void {
+        global $CFG, $DB;
+
+        [$attempt, , $payload] = $this->fixture();
+        incident_service::record($payload + ['action' => 'observed']);
+        $sessionid = (int) $DB->get_field('quizaccess_cdexamcontrol_ses', 'id', ['attemptid' => $attempt->id]);
+        $dbman = $DB->get_manager();
+        $dbman->rename_table(new \xmldb_table('quizaccess_cdexamcontrol_ses'), 'quizaccess_cdexamctrl_sess');
+        set_config('version', 2026091900, 'quizaccess_cdexamcontrol');
+        require_once($CFG->dirroot . '/mod/quiz/accessrule/cdexamcontrol/db/upgrade.php');
+        \xmldb_quizaccess_cdexamcontrol_upgrade(2026091900);
+        $this->assertFalse($dbman->table_exists(new \xmldb_table('quizaccess_cdexamctrl_sess')));
+        $this->assertSame(
+            $sessionid,
+            (int) $DB->get_field('quizaccess_cdexamcontrol_ses', 'id', ['attemptid' => $attempt->id])
+        );
+        $this->assertSame(1, $DB->count_records('quizaccess_cdexamcontrol_evt', ['attemptid' => $attempt->id]));
+    }
+
 }

@@ -36,13 +36,13 @@ class observer {
         $attemptid = (int) $event->objectid;
         $now = time();
         \quizaccess_cdexamcontrol\local\incident_service::close_open_incidents($attemptid, $now);
-        $session = $DB->get_record('quizaccess_cdexamctrl_sess', ['attemptid' => $attemptid]);
+        $session = $DB->get_record('quizaccess_cdexamcontrol_ses', ['attemptid' => $attemptid]);
         if ($session) {
             $session->active = 0;
             $session->focuslost = 0;
             $session->lostsince = 0;
             $session->timemodified = $now;
-            $DB->update_record('quizaccess_cdexamctrl_sess', $session);
+            $DB->update_record('quizaccess_cdexamcontrol_ses', $session);
         }
     }
 
@@ -57,6 +57,6 @@ class observer {
 
         $attemptid = (int) $event->objectid;
         $DB->delete_records('quizaccess_cdexamcontrol_evt', ['attemptid' => $attemptid]);
-        $DB->delete_records('quizaccess_cdexamctrl_sess', ['attemptid' => $attemptid]);
+        $DB->delete_records('quizaccess_cdexamcontrol_ses', ['attemptid' => $attemptid]);
     }
 }

@@ -3,7 +3,7 @@
 ## Automated checks
 
 - tests/js/run.cjs exercises browser-state simulations: delayed initial AJAX, grace filtering, overlapping visibility/focus signals, fullscreen recovery, offline queue ordering, accessibility shortcuts, unsupported fullscreen, cancelled submission, intentional Moodle navigation and unacknowledged beacons.
-- Moodle PHPUnit collector tests use a generated quiz question and a real attempt: out-of-order/duplicate deliveries, overlapping UUIDs, stale page-session isolation, UUID page ownership, foreign-user rejection, instantaneous shortcut observations, exemption reporting and retention.
+- Moodle PHPUnit collector tests use a generated quiz question and a real attempt: out-of-order/duplicate deliveries, overlapping UUIDs, stale page-session isolation, UUID page ownership, foreign-user rejection, instantaneous shortcut observations, exemption reporting, retention and migration of the beta session table. A real course backup/restore test covers quiz settings and exclusion of observations.
 - Existing rule, report and external-function tests are retained under the independent component.
 - Release checks validate metadata, XMLDB table names, string references, translation completeness, PNG integrity and AMD source maps.
 - CI runs PHP lint, Moodle code/PHPDoc checks, metadata checks, savepoint checks, Grunt and PHPUnit.

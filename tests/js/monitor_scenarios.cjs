@@ -52,6 +52,12 @@ module.exports = async function runScenarios(source) {
                 child.parent = this;
                 return child;
             }
+            insertBefore(child, before) {
+                const index = this.children.indexOf(before);
+                this.children.splice(index < 0 ? 0 : index, 0, child);
+                child.parent = this;
+                return child;
+            }
             setAttribute(name, value) { this.attributes[name] = value; }
             focus() { doc.activeElement = this; }
             showModal() { this.open = true; }
@@ -70,6 +76,7 @@ module.exports = async function runScenarios(source) {
         doc.fullscreenEnabled = true;
         doc.fullscreenElement = null;
         doc.focused = true;
+        doc.getElementById = () => null;
         doc.hasFocus = () => doc.focused;
         doc.createElement = tag => new Target(tag);
         doc.querySelector = selector => doc.body.children.find(child =>

@@ -49,7 +49,7 @@ class cleanup extends \core\task\scheduled_task {
         $cutoff = time() - ($retentiondays * DAYSECS);
 
         self::delete_expired_in_batches('quizaccess_cdexamcontrol_evt', 'timecreated', $cutoff);
-        self::delete_expired_in_batches('quizaccess_cdexamctrl_sess', 'timemodified', $cutoff);
+        self::delete_expired_in_batches('quizaccess_cdexamcontrol_ses', 'timemodified', $cutoff);
     }
 
     /**

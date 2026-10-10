@@ -162,7 +162,7 @@ class incident_service {
                     $session->active = 1;
                     $session->lastheartbeat = $now;
                     $session->timemodified = $now;
-                    $DB->update_record('quizaccess_cdexamctrl_sess', $session);
+                    $DB->update_record('quizaccess_cdexamcontrol_ses', $session);
                 }
                 $transaction->allow_commit();
             } catch (\Throwable $error) {
@@ -188,7 +188,7 @@ class incident_service {
     private static function ensure_session(\stdClass $attempt, string $pagesessionid, int $now): \stdClass {
         global $DB;
 
-        $session = $DB->get_record('quizaccess_cdexamctrl_sess', ['attemptid' => $attempt->id]);
+        $session = $DB->get_record('quizaccess_cdexamcontrol_ses', ['attemptid' => $attempt->id]);
         if ($session) {
             return $session;
         }
@@ -206,7 +206,7 @@ class incident_service {
             'timemodified' => $now,
         ];
 
-        $record->id = $DB->insert_record('quizaccess_cdexamctrl_sess', $record);
+        $record->id = $DB->insert_record('quizaccess_cdexamcontrol_ses', $record);
         return $record;
     }
 

@@ -22,8 +22,8 @@ define(['core/ajax'], function(Ajax) {
     function uuid() {
         var bytes = new Uint8Array(16);
         window.crypto.getRandomValues(bytes);
-        bytes[6] = (bytes[6] & 15) | 64;
-        bytes[8] = (bytes[8] & 63) | 128;
+        bytes[6] = (bytes[6] % 16) + 64;
+        bytes[8] = (bytes[8] % 64) + 128;
         return Array.from(bytes, function(value) {
             return value.toString(16).padStart(2, '0');
         }).join('').replace(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/, '$1-$2-$3-$4-$5');
@@ -61,11 +61,23 @@ define(['core/ajax'], function(Ajax) {
          * @param {String} message Optional operational message.
          */
         function status(message) {
-            badge.textContent = message || (stopped ? config.strings.stopped :
-                (queue.length >= MAX_ITEMS ? config.strings.queueFull :
-                    (queue.length ? config.strings.pending :
-                        (!fullscreenSupported && config.requireFullscreen ? config.strings.fullscreenUnsupported :
-                            (initialised ? config.strings.badge : config.strings.connecting)))));
+            var next = config.strings.connecting;
+            if (message) {
+                next = message;
+            } else if (stopped) {
+                next = config.strings.stopped;
+            } else if (queue.length >= MAX_ITEMS) {
+                next = config.strings.queueFull;
+            } else if (queue.length) {
+                next = config.strings.pending;
+            } else if (!fullscreenSupported && config.requireFullscreen) {
+                next = config.strings.fullscreenUnsupported;
+            } else if (initialised) {
+                next = config.strings.badge;
+            }
+            if (badge.textContent !== next) {
+                badge.textContent = next;
+            }
         }
 
         /**
@@ -149,30 +161,34 @@ define(['core/ajax'], function(Ajax) {
             if (draining || stopped) {
                 return draining || Promise.resolve();
             }
-            draining = Promise.resolve().then(function() {
+            draining = flush();
+            return draining;
+        }
+
+        /**
+         * Flush observations sequentially and always release the drain flag.
+         *
+         * @return {Promise}
+         */
+        async function flush() {
+            // Publish the drain promise even when an initialised queue is empty.
+            await Promise.resolve();
+            try {
                 if (!initialised) {
-                    return request(payload({action: 'init'})).then(function() {
-                        initialised = true;
-                    });
+                    await request(payload({action: 'init'}));
+                    initialised = true;
                 }
-                return null;
-            }).then(function next() {
-                if (!queue.length || stopped) {
-                    return null;
-                }
-                var item = queue[0];
-                if (Date.now() - item.queuedat >= MAX_AGE) {
+                while (queue.length && !stopped) {
+                    var item = queue[0];
+                    if (Date.now() - item.queuedat < MAX_AGE) {
+                        await request(item.payload);
+                    }
                     queue.shift();
                     persist();
-                    return next();
                 }
-                return request(item.payload).then(function() {
-                    queue.shift();
-                    persist();
-                    return next();
-                });
-            }).catch(function(error) {
-                if (error && ['attemptnotmonitorable', 'monitoringdisabled', 'incidentlimitreached'].includes(error.errorcode)) {
+            } catch (error) {
+                if (error && ['attemptnotmonitorable', 'monitoringdisabled', 'incidentlimitreached']
+                        .includes(error.errorcode)) {
                     stopped = true;
                     queue = [];
                     persist();
@@ -181,12 +197,11 @@ define(['core/ajax'], function(Ajax) {
                         window.clearInterval(heartbeat);
                     }
                 }
-                // A connection failure must never interrupt answering or saving.
-            }).then(function() {
+                // Connection failures must never interrupt answering or saving.
+            } finally {
                 draining = null;
                 status();
-            });
-            return draining;
+            }
         }
 
         /**
@@ -285,26 +300,23 @@ define(['core/ajax'], function(Ajax) {
             gate.addEventListener('cancel', function(event) {
                 event.preventDefault();
             });
-            view.button.addEventListener('click', function() {
+            view.button.addEventListener('click', async function() {
                 view.button.disabled = true;
-                // Invoke before any asynchronous work; browsers require a gesture.
-                var result;
                 try {
-                    result = document.documentElement.requestFullscreen();
-                } catch (error) {
-                    result = Promise.reject(error);
-                }
-                Promise.resolve(result).then(function() {
+                    // Invoke before asynchronous work; browsers require a gesture.
+                    await document.documentElement.requestFullscreen();
                     if (document.fullscreenElement) {
                         enteredFullscreen = true;
                         dismissGate();
                         checkFocus('fullscreen_exit', false);
+                    } else {
+                        view.message.textContent = config.strings.fullscreenError;
                     }
-                }).catch(function() {
+                } catch (error) {
                     view.message.textContent = config.strings.fullscreenError;
-                }).then(function() {
+                } finally {
                     view.button.disabled = false;
-                });
+                }
             });
         }
 
@@ -403,25 +415,40 @@ define(['core/ajax'], function(Ajax) {
             }
             var keyboard = event.type === 'keydown' && (event.ctrlKey || event.metaKey) &&
                 !event.altKey && ['t', 'n'].includes(String(event.key).toLowerCase());
-            var anchor = event.target && event.target.closest ? event.target.closest('a[href]') : null;
-            var newcontext = ['click', 'auxclick'].includes(event.type) && anchor && !anchor.download && ((anchor.target && !['_self', '_top', '_parent'].includes(anchor.target)) ||
-                event.ctrlKey || event.metaKey || event.shiftKey || event.button === 1);
-            if (keyboard || newcontext) {
+            if (keyboard || opensContext(event)) {
                 event.preventDefault();
                 if (!event.defaultPrevented) {
                     return;
                 }
-                // A prevented request is an instantaneous observation, not time away.
                 collect({action: 'observed', eventuuid: uuid(), reason: 'shortcut_blocked'}, false);
                 status(config.strings.shortcut);
             }
         }
 
         /**
+         * Recognise link clicks opening another browsing context.
+         *
+         * @param {Event} event Browser event.
+         * @return {Boolean}
+         */
+        function opensContext(event) {
+            if (!['click', 'auxclick'].includes(event.type)) {
+                return false;
+            }
+            var anchor = event.target && event.target.closest ? event.target.closest('a[href]') : null;
+            if (!anchor || anchor.download) {
+                return false;
+            }
+            var target = anchor.target && !['_self', '_top', '_parent'].includes(anchor.target);
+            return Boolean(target || event.ctrlKey || event.metaKey || event.shiftKey || event.button === 1);
+        }
+
+        /**
          * Start synchronously, before any network request can delay listeners.
          */
         function start() {
-            document.body.appendChild(badge);
+            var host = document.getElementById('region-main') || document.body;
+            host.insertBefore(badge, host.firstChild);
             status();
             document.addEventListener('visibilitychange', function() {
                 checkFocus('visibility_hidden', false);
@@ -481,19 +508,20 @@ define(['core/ajax'], function(Ajax) {
             drain();
             showGate();
             checkFocus('window_blur', false);
-            heartbeat = window.setInterval(function() {
+            heartbeat = window.setInterval(async function() {
                 if (stopped || navigation) {
                     return;
                 }
                 checkFocus('window_blur', false);
                 if (queue.length || !initialised) {
-                    drain();
+                    await drain();
                 } else if (document.visibilityState === 'visible' && !draining) {
-                    request(payload({action: 'heartbeat'})).then(function() {
+                    try {
+                        await request(payload({action: 'heartbeat'}));
                         status();
-                    }).catch(function() {
+                    } catch (error) {
                         status(config.strings.pending);
-                    });
+                    }
                 }
             }, config.heartbeatMs);
         }

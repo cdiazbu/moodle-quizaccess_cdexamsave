@@ -37,7 +37,7 @@ Use a packaged candidate generated after CI passes; do not treat an untested dev
 4. Purge caches and check that the component is quizaccess_cdexamcontrol.
 5. Enable the plugin in a dedicated trial quiz and run the teacher/student checks in TESTING.md.
 
-Updating beta 0.1.0 keeps the same independent component and table identities. The upgrade adds missing fullscreen/shortcut fields defensively and preserves existing settings. No change is made to the ExamFocus component.
+Updating beta 0.1.0 keeps the same independent component and recorded data. The upgrade renames the abbreviated beta session table to a component-prefixed name and adds missing fullscreen/shortcut fields defensively and preserves existing settings. No change is made to the ExamFocus component.
 
 ## Development and release
 

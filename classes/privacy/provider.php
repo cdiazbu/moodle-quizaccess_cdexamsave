@@ -59,18 +59,18 @@ class provider implements
             'privacy:metadata:quizaccess_cdexamcontrol_evt'
         );
         $collection->add_database_table(
-            'quizaccess_cdexamctrl_sess',
+            'quizaccess_cdexamcontrol_ses',
             [
-                'quizid' => 'privacy:metadata:quizaccess_cdexamctrl_sess:quizid',
-                'attemptid' => 'privacy:metadata:quizaccess_cdexamctrl_sess:attemptid',
-                'userid' => 'privacy:metadata:quizaccess_cdexamctrl_sess:userid',
-                'pagesessionid' => 'privacy:metadata:quizaccess_cdexamctrl_sess:pagesessionid',
-                'active' => 'privacy:metadata:quizaccess_cdexamctrl_sess:state',
-                'focuslost' => 'privacy:metadata:quizaccess_cdexamctrl_sess:state',
-                'lostsince' => 'privacy:metadata:quizaccess_cdexamctrl_sess:state',
-                'lastheartbeat' => 'privacy:metadata:quizaccess_cdexamctrl_sess:state',
+                'quizid' => 'privacy:metadata:quizaccess_cdexamcontrol_ses:quizid',
+                'attemptid' => 'privacy:metadata:quizaccess_cdexamcontrol_ses:attemptid',
+                'userid' => 'privacy:metadata:quizaccess_cdexamcontrol_ses:userid',
+                'pagesessionid' => 'privacy:metadata:quizaccess_cdexamcontrol_ses:pagesessionid',
+                'active' => 'privacy:metadata:quizaccess_cdexamcontrol_ses:state',
+                'focuslost' => 'privacy:metadata:quizaccess_cdexamcontrol_ses:state',
+                'lostsince' => 'privacy:metadata:quizaccess_cdexamcontrol_ses:state',
+                'lastheartbeat' => 'privacy:metadata:quizaccess_cdexamcontrol_ses:state',
             ],
-            'privacy:metadata:quizaccess_cdexamctrl_sess'
+            'privacy:metadata:quizaccess_cdexamcontrol_ses'
         );
         return $collection;
     }
@@ -100,7 +100,7 @@ class provider implements
                   FROM {context} ctx
                   JOIN {course_modules} cm ON cm.id = ctx.instanceid
                   JOIN {modules} m ON m.id = cm.module AND m.name = :modulename
-                  JOIN {quizaccess_cdexamctrl_sess} s ON s.quizid = cm.instance
+                  JOIN {quizaccess_cdexamcontrol_ses} s ON s.quizid = cm.instance
                  WHERE ctx.contextlevel = :contextlevel AND s.userid = :userid";
         $contextlist->add_from_sql($sql, $params);
         return $contextlist;
@@ -125,7 +125,7 @@ class provider implements
                 'quizid' => $quizid,
                 'userid' => $userid,
             ], 'timestart ASC'));
-            $sessions = array_values($DB->get_records('quizaccess_cdexamctrl_sess', [
+            $sessions = array_values($DB->get_records('quizaccess_cdexamcontrol_ses', [
                 'quizid' => $quizid,
                 'userid' => $userid,
             ]));
@@ -156,7 +156,7 @@ class provider implements
             return;
         }
         $DB->delete_records('quizaccess_cdexamcontrol_evt', ['quizid' => $quizid]);
-        $DB->delete_records('quizaccess_cdexamctrl_sess', ['quizid' => $quizid]);
+        $DB->delete_records('quizaccess_cdexamcontrol_ses', ['quizid' => $quizid]);
     }
 
     /**
@@ -176,7 +176,7 @@ class provider implements
             }
             $conditions = ['quizid' => $quizid, 'userid' => $userid];
             $DB->delete_records('quizaccess_cdexamcontrol_evt', $conditions);
-            $DB->delete_records('quizaccess_cdexamctrl_sess', $conditions);
+            $DB->delete_records('quizaccess_cdexamcontrol_ses', $conditions);
         }
     }
 
@@ -198,7 +198,7 @@ class provider implements
         );
         $userlist->add_from_sql(
             'userid',
-            'SELECT userid FROM {quizaccess_cdexamctrl_sess} WHERE quizid = :quizid',
+            'SELECT userid FROM {quizaccess_cdexamcontrol_ses} WHERE quizid = :quizid',
             ['quizid' => $quizid]
         );
     }
@@ -225,7 +225,7 @@ class provider implements
             $params
         );
         $DB->delete_records_select(
-            'quizaccess_cdexamctrl_sess',
+            'quizaccess_cdexamcontrol_ses',
             "quizid = :quizid AND userid {$usersql}",
             $params
         );

@@ -31,6 +31,7 @@ $capabilities = [
         'archetypes' => [],
     ],
     'quizaccess/cdexamcontrol:viewreport' => [
+        'riskbitmask' => RISK_PERSONAL,
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => [

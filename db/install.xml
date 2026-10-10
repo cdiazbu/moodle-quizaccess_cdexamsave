@@ -51,7 +51,7 @@
         <INDEX NAME="created_ix" UNIQUE="false" FIELDS="timecreated"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="quizaccess_cdexamctrl_sess" COMMENT="Current monitoring state for each quiz attempt">
+    <TABLE NAME="quizaccess_cdexamcontrol_ses" COMMENT="Current monitoring state for each quiz attempt">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
