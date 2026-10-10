@@ -260,6 +260,9 @@ define(['core/ajax'], function(Ajax) {
             heading.textContent = title;
             element.setAttribute('aria-labelledby', heading.id);
             var paragraph = document.createElement('p');
+            paragraph.id = heading.id + '-message';
+            paragraph.setAttribute('aria-live', 'polite');
+            element.setAttribute('aria-describedby', paragraph.id);
             paragraph.textContent = text;
             var button = document.createElement('button');
             button.type = 'button';

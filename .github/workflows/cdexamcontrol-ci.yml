@@ -85,6 +85,10 @@ jobs:
       - name: JavaScript and CSS standards
         if: ${{ !cancelled() }}
         run: moodle-plugin-ci grunt --max-lint-warnings 0
+      - name: Export canonical AMD for source review
+        if: ${{ !cancelled() && matrix.php == '8.1' && matrix.database == 'pgsql' }}
+        run: |
+          node -e "const fs=require('node:fs');const p='moodle/mod/quiz/accessrule/cdexamcontrol/amd/build/';const files=fs.readdirSync(p).filter(n=>/\.min\.js(\.map)?$/.test(n)).sort().map(n=>({path:'amd/build/'+n,content:fs.readFileSync(p+n,'utf8')}));console.log('CD_EXAM_CONTROL_AMD:'+JSON.stringify(files));"
       - name: PHPUnit
         if: ${{ !cancelled() }}
         run: moodle-plugin-ci phpunit --fail-on-warning
