@@ -3,7 +3,7 @@
 Independent Moodle quiz access plugin: component quizaccess_cdexamcontrol, directory cdexamcontrol.
 Author: Carlos Díaz Bueno. GPL v3 or later. Version 0.2.0, development beta.
 
-This branch hosts the independent project temporarily inside the existing repository. It must not be merged into the ExamFocus release branch. CD ExamFocus (quizaccess_cdexamsave) remains a separate component and its installed data is not migrated or renamed.
+The project is independent of CD ExamFocus (quizaccess_cdexamsave). Its installed data is not migrated or renamed. The intended repository is cdiazbu/moodle-quizaccess_cdexamcontrol; until it is created, development evidence is held in the development/cdexamcontrol-0.2.0 branch of the previous repository. That branch must not be merged into the ExamFocus release branch.
 
 ## Behaviour
 
@@ -13,7 +13,7 @@ Monitoring is off by default and enabled separately in each quiz. When enabled:
 - Fullscreen is requested through an accessible prompt. If the browser cannot support it, the student can continue and sees the limitation.
 - New-tab/window shortcut interception is optional and off by default. It preserves copy, paste, zoom, refresh and normal keyboard navigation.
 - Authorised staff can view the live report, filter by permitted groups and export observations or attempt summaries.
-- English and Spanish interfaces are included.
+- English is the canonical bundled language. The Spanish translation is supplied separately for AMOS import after the new component is registered, following the ExamFocus publication process.
 - Staff can grant an individual exemption through a module-context role with quizaccess/cdexamcontrol:exempt for an agreed adjustment. The live report identifies the exemption.
 - Moodle owns answers, autosave, quiz timing and submission. The plugin does not change grades or submit attempts.
 
@@ -52,6 +52,8 @@ npx grunt amd --root=mod/quiz/accessrule/cdexamcontrol
 python3 tools/build_release.py
 ~~~
 
-The canonical package is CD-Exam-Control-0.2.0.zip with a cdexamcontrol/ top-level folder. The workflow rebuilds AMD with Moodle Grunt before packaging. The checked-in development monitor build is readable AMD and must be replaced by the compiled Grunt output for a release.
+The canonical package is CD-Exam-Control-0.2.0.zip with a cdexamcontrol/ top-level folder. The workflow verifies checked-in AMD against Moodle Grunt before packaging. The builder requires matching source maps and excludes tests, tooling and GitHub workflows from the installable ZIP. The Spanish AMOS import ZIP contains only quizaccess_cdexamcontrol.php at its root.
 
 See TESTING.md for acceptance criteria and docs/GUIA_PROFESORADO_ES.md for classroom use.
+
+The manual publish-beta workflow is restricted to main in the independent repository. It requires successful CI for the exact commit and an explicit declaration that clone acceptance is recorded. It creates a prerelease and refuses to replace an existing v0.2.0 tag. No beta publication is scheduled automatically.

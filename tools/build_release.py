@@ -14,7 +14,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 TOP_LEVEL = "cdexamcontrol"
-EXCLUDED_PREFIXES = (".github/",)
+EXCLUDED_PREFIXES = (".github/", "tests/", "tools/")
+EXCLUDED_FILES = {".gitignore"}
 
 
 def plugin_metadata() -> tuple[str, tuple[int, int, int, int, int, int]]:
@@ -41,12 +42,12 @@ def release_files() -> list[Path]:
     )
     paths = []
     for line in result.stdout.splitlines():
-        if not line or line.startswith(EXCLUDED_PREFIXES):
+        if not line or line.startswith(EXCLUDED_PREFIXES) or line in EXCLUDED_FILES:
             continue
         path = ROOT / line
         if path.is_file():
             paths.append(path)
-    # Moodle Grunt generates source maps that need not be tracked in this branch.
+    # Include canonical source maps in the installable package.
     for generated in (ROOT / "amd/build").glob("*.min.js.map"):
         if generated not in paths:
             paths.append(generated)
@@ -89,6 +90,7 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
+        subprocess.run([sys.executable, str(ROOT / "tools/validate_release.py")], cwd=ROOT, check=True)
         count, digest = build(args.output.resolve())
     except (OSError, subprocess.CalledProcessError, ValueError) as error:
         print(f"Release build failed: {error}", file=sys.stderr)

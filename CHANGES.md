@@ -16,7 +16,7 @@ Development beta for the independent quizaccess_cdexamcontrol component.
 - Agreed-adjustment exemption capability, visible in the live report.
 - Retention excludes in-progress and overdue attempts; enforce activity grouping boundaries in reports and exports.
 - Escape spreadsheet formula-like names even with leading whitespace.
-- Complete English and Spanish strings.
+- Complete English strings and a separate Spanish translation for AMOS.
 - JavaScript state regression scenarios and Moodle PHPUnit collector regressions.
 
 The current candidate must pass Moodle integration and classroom browser checks before production use.

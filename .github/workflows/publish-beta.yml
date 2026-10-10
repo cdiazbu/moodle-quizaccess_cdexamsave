@@ -1,0 +1,58 @@
+name: Publish verified CD Exam Control beta
+
+on:
+  workflow_dispatch:
+    inputs:
+      clone_acceptance_recorded:
+        description: 'The clone installation and real student/browser checks are recorded in VALIDATION.md'
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: publish-cdexamcontrol-0.2.0
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'cdiazbu/moodle-quizaccess_cdexamcontrol' && github.ref == 'refs/heads/main' && inputs.clone_acceptance_recorded
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Require green CI for this exact main commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          verified=$(gh run list --workflow cdexamcontrol-ci.yml --branch main --commit "$GITHUB_SHA" --event push --limit 20 --json status,conclusion --jq 'any(.[]; .status == "completed" and .conclusion == "success")')
+          test "$verified" = true
+      - name: Validate beta metadata and build
+        run: |
+          grep -Fx 'Clone acceptance: PASSED' docs/VALIDATION.md
+          python3 - <<'PY'
+          from pathlib import Path
+          text = Path('version.php').read_text()
+          assert "$plugin->version = 2026101000;" in text
+          assert "$plugin->release = '0.2.0';" in text
+          assert "$plugin->maturity = MATURITY_BETA;" in text
+          PY
+          python3 tools/build_release.py --output "$RUNNER_TEMP/CD-Exam-Control-0.2.0.zip"
+          unzip -t "$RUNNER_TEMP/CD-Exam-Control-0.2.0.zip"
+          (cd "$RUNNER_TEMP" && sha256sum CD-Exam-Control-0.2.0.zip > SHA256SUMS.txt)
+      - name: Publish an immutable beta tag and package
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/v0.2.0" >/dev/null 2>&1; then
+            echo 'Tag v0.2.0 already exists; leaving it unchanged.'
+            exit 1
+          fi
+          gh release create v0.2.0 "$RUNNER_TEMP/CD-Exam-Control-0.2.0.zip" "$RUNNER_TEMP/SHA256SUMS.txt" \
+            --target "$GITHUB_SHA" --prerelease \
+            --title 'CD Exam Control 0.2.0 beta' \
+            --notes-file CHANGES.md
