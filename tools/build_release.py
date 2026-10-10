@@ -46,6 +46,10 @@ def release_files() -> list[Path]:
         path = ROOT / line
         if path.is_file():
             paths.append(path)
+    # Moodle Grunt generates source maps that need not be tracked in this branch.
+    for generated in (ROOT / "amd/build").glob("*.min.js.map"):
+        if generated not in paths:
+            paths.append(generated)
     return sorted(paths, key=lambda item: item.relative_to(ROOT).as_posix())
 
 

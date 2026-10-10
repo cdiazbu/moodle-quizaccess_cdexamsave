@@ -12,7 +12,7 @@ jobs:
   monitor:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -47,7 +47,7 @@ jobs:
           --health-cmd="healthcheck.sh --connect --innodb_initialized"
           --health-interval 10s --health-timeout 5s --health-retries 3
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           path: plugin
           persist-credentials: false
@@ -104,7 +104,7 @@ jobs:
     needs: [monitor, moodle]
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
       - uses: actions/download-artifact@v4
@@ -113,8 +113,10 @@ jobs:
           path: amd/build/
       - run: python3 tools/validate_release.py
       - run: python3 tools/build_release.py --output ./CD-Exam-Control-0.2.0.zip
+      - name: Prepare directly installable artifact
+        run: python3 -c "import zipfile; zipfile.ZipFile('CD-Exam-Control-0.2.0.zip').extractall('release')"
       - uses: actions/upload-artifact@v4
         with:
           name: CD-Exam-Control-0.2.0
-          path: CD-Exam-Control-0.2.0.zip
+          path: release/
           if-no-files-found: error

@@ -178,7 +178,7 @@ define(['core/ajax'], function(Ajax) {
                     await request(payload({action: 'init'}));
                     initialised = true;
                 }
-                while (queue.length && !stopped) {
+                while (queue.length) {
                     var item = queue[0];
                     if (Date.now() - item.queuedat < MAX_AGE) {
                         await request(item.payload);

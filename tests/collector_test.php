@@ -238,6 +238,7 @@ final class collector_test extends \advanced_testcase {
         $dbman = $DB->get_manager();
         $dbman->rename_table(new \xmldb_table('quizaccess_cdexamcontrol_ses'), 'quizaccess_cdexamctrl_sess');
         set_config('version', 2026091900, 'quizaccess_cdexamcontrol');
+        require_once($CFG->libdir . '/upgradelib.php');
         require_once($CFG->dirroot . '/mod/quiz/accessrule/cdexamcontrol/db/upgrade.php');
         \xmldb_quizaccess_cdexamcontrol_upgrade(2026091900);
         $this->assertFalse($dbman->table_exists(new \xmldb_table('quizaccess_cdexamctrl_sess')));
@@ -247,5 +248,4 @@ final class collector_test extends \advanced_testcase {
         );
         $this->assertSame(1, $DB->count_records('quizaccess_cdexamcontrol_evt', ['attemptid' => $attempt->id]));
     }
-
 }

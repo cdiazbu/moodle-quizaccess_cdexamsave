@@ -21,6 +21,14 @@
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+defined('MOODLE_INTERNAL') || die();
+
+global $CFG;
+require_once($CFG->dirroot . '/mod/quiz/backup/moodle2/restore_mod_quiz_access_subplugin.class.php');
+
+/**
+ * Restore per-quiz CD Exam Control settings.
+ */
 class restore_quizaccess_cdexamcontrol_subplugin extends restore_mod_quiz_access_subplugin {
     /**
      * Define the settings restore path.
