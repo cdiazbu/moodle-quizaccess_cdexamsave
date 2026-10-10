@@ -14,18 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace quizaccess_cdexamsave\external;
+namespace quizaccess_cdexamcontrol\external;
 
 use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use core_external\external_value;
-use quizaccess_cdexamsave\local\incident_service;
+use quizaccess_cdexamcontrol\local\incident_service;
 
 /**
  * External function used by the student monitor to record one signal.
  *
- * @package    quizaccess_cdexamsave
+ * @package    quizaccess_cdexamcontrol
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -91,7 +91,7 @@ class record_signal extends external_api {
 
         $attempt = $DB->get_record('quiz_attempts', ['id' => $params['attemptid']], 'id,quiz', MUST_EXIST);
         if ((int) $attempt->quiz !== (int) $cm->instance) {
-            throw new \moodle_exception('invalidrequest', 'quizaccess_cdexamsave');
+            throw new \moodle_exception('invalidrequest', 'quizaccess_cdexamcontrol');
         }
 
         return incident_service::record($params);

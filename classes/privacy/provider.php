@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace quizaccess_cdexamsave\privacy;
+namespace quizaccess_cdexamcontrol\privacy;
 
 use core_privacy\local\metadata\collection;
 use core_privacy\local\request\approved_contextlist;
@@ -24,9 +24,9 @@ use core_privacy\local\request\userlist;
 use core_privacy\local\request\writer;
 
 /**
- * Privacy API implementation for CD ExamFocus.
+ * Privacy API implementation for CD Exam Control.
  *
- * @package    quizaccess_cdexamsave
+ * @package    quizaccess_cdexamcontrol
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -42,35 +42,35 @@ class provider implements
      */
     public static function get_metadata(collection $collection): collection {
         $collection->add_database_table(
-            'quizaccess_cdexamsave_evt',
+            'quizaccess_cdexamcontrol_evt',
             [
-                'quizid' => 'privacy:metadata:quizaccess_cdexamsave_evt:quizid',
-                'attemptid' => 'privacy:metadata:quizaccess_cdexamsave_evt:attemptid',
-                'userid' => 'privacy:metadata:quizaccess_cdexamsave_evt:userid',
-                'eventuuid' => 'privacy:metadata:quizaccess_cdexamsave_evt:eventuuid',
-                'pagesessionid' => 'privacy:metadata:quizaccess_cdexamsave_evt:pagesessionid',
-                'reason' => 'privacy:metadata:quizaccess_cdexamsave_evt:reason',
-                'timestart' => 'privacy:metadata:quizaccess_cdexamsave_evt:times',
-                'timeend' => 'privacy:metadata:quizaccess_cdexamsave_evt:times',
-                'duration' => 'privacy:metadata:quizaccess_cdexamsave_evt:times',
-                'clientstart' => 'privacy:metadata:quizaccess_cdexamsave_evt:times',
-                'clientend' => 'privacy:metadata:quizaccess_cdexamsave_evt:times',
+                'quizid' => 'privacy:metadata:quizaccess_cdexamcontrol_evt:quizid',
+                'attemptid' => 'privacy:metadata:quizaccess_cdexamcontrol_evt:attemptid',
+                'userid' => 'privacy:metadata:quizaccess_cdexamcontrol_evt:userid',
+                'eventuuid' => 'privacy:metadata:quizaccess_cdexamcontrol_evt:eventuuid',
+                'pagesessionid' => 'privacy:metadata:quizaccess_cdexamcontrol_evt:pagesessionid',
+                'reason' => 'privacy:metadata:quizaccess_cdexamcontrol_evt:reason',
+                'timestart' => 'privacy:metadata:quizaccess_cdexamcontrol_evt:times',
+                'timeend' => 'privacy:metadata:quizaccess_cdexamcontrol_evt:times',
+                'duration' => 'privacy:metadata:quizaccess_cdexamcontrol_evt:times',
+                'clientstart' => 'privacy:metadata:quizaccess_cdexamcontrol_evt:times',
+                'clientend' => 'privacy:metadata:quizaccess_cdexamcontrol_evt:times',
             ],
-            'privacy:metadata:quizaccess_cdexamsave_evt'
+            'privacy:metadata:quizaccess_cdexamcontrol_evt'
         );
         $collection->add_database_table(
-            'quizaccess_cdexamsave_sess',
+            'quizaccess_cdexamctrl_sess',
             [
-                'quizid' => 'privacy:metadata:quizaccess_cdexamsave_sess:quizid',
-                'attemptid' => 'privacy:metadata:quizaccess_cdexamsave_sess:attemptid',
-                'userid' => 'privacy:metadata:quizaccess_cdexamsave_sess:userid',
-                'pagesessionid' => 'privacy:metadata:quizaccess_cdexamsave_sess:pagesessionid',
-                'active' => 'privacy:metadata:quizaccess_cdexamsave_sess:state',
-                'focuslost' => 'privacy:metadata:quizaccess_cdexamsave_sess:state',
-                'lostsince' => 'privacy:metadata:quizaccess_cdexamsave_sess:state',
-                'lastheartbeat' => 'privacy:metadata:quizaccess_cdexamsave_sess:state',
+                'quizid' => 'privacy:metadata:quizaccess_cdexamctrl_sess:quizid',
+                'attemptid' => 'privacy:metadata:quizaccess_cdexamctrl_sess:attemptid',
+                'userid' => 'privacy:metadata:quizaccess_cdexamctrl_sess:userid',
+                'pagesessionid' => 'privacy:metadata:quizaccess_cdexamctrl_sess:pagesessionid',
+                'active' => 'privacy:metadata:quizaccess_cdexamctrl_sess:state',
+                'focuslost' => 'privacy:metadata:quizaccess_cdexamctrl_sess:state',
+                'lostsince' => 'privacy:metadata:quizaccess_cdexamctrl_sess:state',
+                'lastheartbeat' => 'privacy:metadata:quizaccess_cdexamctrl_sess:state',
             ],
-            'privacy:metadata:quizaccess_cdexamsave_sess'
+            'privacy:metadata:quizaccess_cdexamctrl_sess'
         );
         return $collection;
     }
@@ -92,7 +92,7 @@ class provider implements
                   FROM {context} ctx
                   JOIN {course_modules} cm ON cm.id = ctx.instanceid
                   JOIN {modules} m ON m.id = cm.module AND m.name = :modulename
-                  JOIN {quizaccess_cdexamsave_evt} e ON e.quizid = cm.instance
+                  JOIN {quizaccess_cdexamcontrol_evt} e ON e.quizid = cm.instance
                  WHERE ctx.contextlevel = :contextlevel AND e.userid = :userid";
         $contextlist->add_from_sql($sql, $params);
 
@@ -100,7 +100,7 @@ class provider implements
                   FROM {context} ctx
                   JOIN {course_modules} cm ON cm.id = ctx.instanceid
                   JOIN {modules} m ON m.id = cm.module AND m.name = :modulename
-                  JOIN {quizaccess_cdexamsave_sess} s ON s.quizid = cm.instance
+                  JOIN {quizaccess_cdexamctrl_sess} s ON s.quizid = cm.instance
                  WHERE ctx.contextlevel = :contextlevel AND s.userid = :userid";
         $contextlist->add_from_sql($sql, $params);
         return $contextlist;
@@ -121,11 +121,11 @@ class provider implements
             if (!$quizid) {
                 continue;
             }
-            $events = array_values($DB->get_records('quizaccess_cdexamsave_evt', [
+            $events = array_values($DB->get_records('quizaccess_cdexamcontrol_evt', [
                 'quizid' => $quizid,
                 'userid' => $userid,
             ], 'timestart ASC'));
-            $sessions = array_values($DB->get_records('quizaccess_cdexamsave_sess', [
+            $sessions = array_values($DB->get_records('quizaccess_cdexamctrl_sess', [
                 'quizid' => $quizid,
                 'userid' => $userid,
             ]));
@@ -133,7 +133,7 @@ class provider implements
                 continue;
             }
             writer::with_context($context)->export_data(
-                [get_string('privacy:path', 'quizaccess_cdexamsave')],
+                [get_string('privacy:path', 'quizaccess_cdexamcontrol')],
                 (object) [
                     'incidents' => $events,
                     'sessions' => $sessions,
@@ -155,8 +155,8 @@ class provider implements
         if (!$quizid) {
             return;
         }
-        $DB->delete_records('quizaccess_cdexamsave_evt', ['quizid' => $quizid]);
-        $DB->delete_records('quizaccess_cdexamsave_sess', ['quizid' => $quizid]);
+        $DB->delete_records('quizaccess_cdexamcontrol_evt', ['quizid' => $quizid]);
+        $DB->delete_records('quizaccess_cdexamctrl_sess', ['quizid' => $quizid]);
     }
 
     /**
@@ -175,8 +175,8 @@ class provider implements
                 continue;
             }
             $conditions = ['quizid' => $quizid, 'userid' => $userid];
-            $DB->delete_records('quizaccess_cdexamsave_evt', $conditions);
-            $DB->delete_records('quizaccess_cdexamsave_sess', $conditions);
+            $DB->delete_records('quizaccess_cdexamcontrol_evt', $conditions);
+            $DB->delete_records('quizaccess_cdexamctrl_sess', $conditions);
         }
     }
 
@@ -193,12 +193,12 @@ class provider implements
         }
         $userlist->add_from_sql(
             'userid',
-            'SELECT userid FROM {quizaccess_cdexamsave_evt} WHERE quizid = :quizid',
+            'SELECT userid FROM {quizaccess_cdexamcontrol_evt} WHERE quizid = :quizid',
             ['quizid' => $quizid]
         );
         $userlist->add_from_sql(
             'userid',
-            'SELECT userid FROM {quizaccess_cdexamsave_sess} WHERE quizid = :quizid',
+            'SELECT userid FROM {quizaccess_cdexamctrl_sess} WHERE quizid = :quizid',
             ['quizid' => $quizid]
         );
     }
@@ -220,12 +220,12 @@ class provider implements
         [$usersql, $params] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'privacyuser');
         $params['quizid'] = $quizid;
         $DB->delete_records_select(
-            'quizaccess_cdexamsave_evt',
+            'quizaccess_cdexamcontrol_evt',
             "quizid = :quizid AND userid {$usersql}",
             $params
         );
         $DB->delete_records_select(
-            'quizaccess_cdexamsave_sess',
+            'quizaccess_cdexamctrl_sess',
             "quizid = :quizid AND userid {$usersql}",
             $params
         );

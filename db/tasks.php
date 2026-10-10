@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Scheduled tasks for CD ExamFocus.
+ * Scheduled tasks for CD Exam Control.
  *
- * @package    quizaccess_cdexamsave
+ * @package    quizaccess_cdexamcontrol
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $tasks = [
     [
-        'classname' => '\\quizaccess_cdexamsave\\task\\cleanup',
+        'classname' => '\\quizaccess_cdexamcontrol\\task\\cleanup',
         'blocking' => 0,
         'minute' => '17',
         'hour' => '3',

@@ -14,12 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace quizaccess_cdexamsave\local;
+namespace quizaccess_cdexamcontrol\local;
 
 /**
  * Builds permission-aware live and export datasets.
  *
- * @package    quizaccess_cdexamsave
+ * @package    quizaccess_cdexamcontrol
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,8 +30,8 @@ class report_service {
      * @return array Incident-count and cumulative-duration thresholds.
      */
     public static function get_review_thresholds(): array {
-        $incidentcount = (int) get_config('quizaccess_cdexamsave', 'reviewincidentcount');
-        $duration = (int) get_config('quizaccess_cdexamsave', 'reviewduration');
+        $incidentcount = (int) get_config('quizaccess_cdexamcontrol', 'reviewincidentcount');
+        $duration = (int) get_config('quizaccess_cdexamcontrol', 'reviewduration');
 
         return [
             'incidentcount' => max(1, min(100, $incidentcount ?: 3)),
@@ -73,7 +73,7 @@ class report_service {
         global $DB;
 
         $context = \context_module::instance($cm->id);
-        require_capability('quizaccess/cdexamsave:viewreport', $context);
+        require_capability('quizaccess/cdexamcontrol:viewreport', $context);
         $alloweduserids = self::get_allowed_userids($cm, $context, $groupid);
         $now = time();
 
@@ -104,7 +104,7 @@ class report_service {
                 'attempt'
             );
             $sessionrecords = $DB->get_records_select(
-                'quizaccess_cdexamsave_sess',
+                'quizaccess_cdexamctrl_sess',
                 "attemptid {$attemptsql}",
                 $attemptparams
             );
@@ -115,7 +115,7 @@ class report_service {
             $aggregatesql = "SELECT attemptid, COUNT(id) AS incidentcount,
                                     SUM(duration) AS totalduration,
                                     MAX(timestart) AS lastincident
-                               FROM {quizaccess_cdexamsave_evt}
+                               FROM {quizaccess_cdexamcontrol_evt}
                               WHERE attemptid {$attemptsql}
                            GROUP BY attemptid";
             foreach ($DB->get_records_sql($aggregatesql, $attemptparams) as $aggregate) {
@@ -123,9 +123,9 @@ class report_service {
             }
         }
 
-        $heartbeatinterval = (int) get_config('quizaccess_cdexamsave', 'heartbeatinterval');
+        $heartbeatinterval = (int) get_config('quizaccess_cdexamcontrol', 'heartbeatinterval');
         $heartbeatinterval = max(5, min(60, $heartbeatinterval ?: 10));
-        $staleseconds = (int) get_config('quizaccess_cdexamsave', 'staleseconds');
+        $staleseconds = (int) get_config('quizaccess_cdexamcontrol', 'staleseconds');
         $staleseconds = max(15, min(300, $staleseconds ?: max(35, $heartbeatinterval * 3)));
 
         $participantrows = [];
@@ -140,7 +140,11 @@ class report_service {
             $focuslost = $session && !empty($session->focuslost);
             $lastheartbeat = $session ? (int) $session->lastheartbeat : 0;
 
-            if ($focuslost) {
+            $exempt = has_capability('quizaccess/cdexamcontrol:exempt', $context, $attempt->userid);
+            if ($exempt) {
+                $status = 'exempt';
+                $focuslost = false;
+            } else if ($focuslost) {
                 $status = 'attention';
                 $attentioncount++;
             } else if (!$session) {
@@ -163,6 +167,7 @@ class report_service {
                 (bool) $focuslost,
                 $reviewthresholds
             );
+            $needsreview = $needsreview && !$exempt;
             if ($needsreview) {
                 $reviewcount++;
             }
@@ -172,9 +177,9 @@ class report_service {
                 'fullname' => fullname($attempt),
                 'attempt' => (int) $attempt->attempt,
                 'status' => $status,
-                'statustext' => get_string('status_' . $status, 'quizaccess_cdexamsave'),
+                'statustext' => get_string('status_' . $status, 'quizaccess_cdexamcontrol'),
                 'focuslost' => (bool) $focuslost,
-                'focustext' => get_string($focuslost ? 'focus_lost' : 'focus_ok', 'quizaccess_cdexamsave'),
+                'focustext' => get_string($focuslost ? 'focus_lost' : 'focus_ok', 'quizaccess_cdexamcontrol'),
                 'incidentcount' => $incidentcount,
                 'totalduration' => $totalduration,
                 'totaldurationtext' => format_time($totalduration),
@@ -183,12 +188,12 @@ class report_service {
                 'attemptstarted' => (int) $attempt->timestart,
                 'attemptstartedtext' => userdate((int) $attempt->timestart),
                 'needsreview' => $needsreview,
-                'reviewtext' => get_string($needsreview ? 'reviewrecommended' : 'reviewnotneeded', 'quizaccess_cdexamsave'),
+                'reviewtext' => get_string($needsreview ? 'reviewrecommended' : 'reviewnotneeded', 'quizaccess_cdexamcontrol'),
             ];
         }
 
         usort($participantrows, static function (array $left, array $right): int {
-            $weights = ['attention' => 0, 'disconnected' => 2, 'notstarted' => 3, 'connected' => 4];
+            $weights = ['attention' => 0, 'disconnected' => 2, 'notstarted' => 3, 'connected' => 4, 'exempt' => 5];
             $leftweight = $left['needsreview'] && $left['status'] !== 'attention' ? 1 : $weights[$left['status']];
             $rightweight = $right['needsreview'] && $right['status'] !== 'attention' ? 1 : $weights[$right['status']];
             $comparison = $leftweight <=> $rightweight;
@@ -224,14 +229,14 @@ class report_service {
         global $DB;
 
         $context = \context_module::instance($cm->id);
-        require_capability('quizaccess/cdexamsave:exportreport', $context);
+        require_capability('quizaccess/cdexamcontrol:exportreport', $context);
         $alloweduserids = self::get_allowed_userids($cm, $context, $groupid);
         [$userwhere, $userparams] = self::user_filter_sql('e.userid', $alloweduserids, 'exportuser');
         $params = array_merge(['quizid' => $cm->instance], $userparams);
         $sql = "SELECT e.id, e.userid, e.attemptid, e.reason, e.timestart, e.timeend,
                        e.duration, qa.attempt, u.firstname, u.lastname, u.firstnamephonetic,
                        u.lastnamephonetic, u.middlename, u.alternatename
-                  FROM {quizaccess_cdexamsave_evt} e
+                  FROM {quizaccess_cdexamcontrol_evt} e
                   JOIN {quiz_attempts} qa ON qa.id = e.attemptid
                   JOIN {user} u ON u.id = e.userid
                  WHERE e.quizid = :quizid {$userwhere}
@@ -251,7 +256,7 @@ class report_service {
         global $DB;
 
         $context = \context_module::instance($cm->id);
-        require_capability('quizaccess/cdexamsave:exportreport', $context);
+        require_capability('quizaccess/cdexamcontrol:exportreport', $context);
         $alloweduserids = self::get_allowed_userids($cm, $context, $groupid);
         [$userwhere, $userparams] = self::user_filter_sql('qa.userid', $alloweduserids, 'summaryuser');
         $params = array_merge([
@@ -274,7 +279,7 @@ class report_service {
                                       AS totalduration,
                                   MAX(CASE WHEN timeend = 0 THEN :nowmaximum - timestart ELSE duration END)
                                       AS maxduration
-                             FROM {quizaccess_cdexamsave_evt}
+                             FROM {quizaccess_cdexamcontrol_evt}
                          GROUP BY attemptid
                        ) e ON e.attemptid = qa.id
                  WHERE qa.quiz = :quizid
@@ -314,7 +319,7 @@ class report_service {
         $sql = "SELECT e.id, e.userid, e.attemptid, e.reason, e.timestart, e.timeend,
                        e.duration, qa.attempt, u.firstname, u.lastname, u.firstnamephonetic,
                        u.lastnamephonetic, u.middlename, u.alternatename
-                  FROM {quizaccess_cdexamsave_evt} e
+                  FROM {quizaccess_cdexamcontrol_evt} e
                   JOIN {quiz_attempts} qa ON qa.id = e.attemptid
                   JOIN {user} u ON u.id = e.userid
                  WHERE e.quizid = :quizid {$userwhere}
@@ -331,11 +336,11 @@ class report_service {
                 'fullname' => fullname($record),
                 'attempt' => (int) $record->attempt,
                 'reason' => $record->reason,
-                'reasontext' => get_string('reason_' . $record->reason, 'quizaccess_cdexamsave'),
+                'reasontext' => get_string('reason_' . $record->reason, 'quizaccess_cdexamcontrol'),
                 'started' => (int) $record->timestart,
                 'startedtext' => userdate((int) $record->timestart),
                 'ended' => (int) $record->timeend,
-                'endedtext' => $active ? get_string('incidentactive', 'quizaccess_cdexamsave') : userdate((int) $record->timeend),
+                'endedtext' => $active ? get_string('incidentactive', 'quizaccess_cdexamcontrol') : userdate((int) $record->timeend),
                 'duration' => $duration,
                 'durationtext' => format_time($duration),
                 'active' => $active,
@@ -357,7 +362,7 @@ class report_service {
         [$userwhere, $userparams] = self::user_filter_sql('userid', $alloweduserids, 'countuser');
         $params = array_merge(['quizid' => $cm->instance], $userparams);
         return (int) $DB->count_records_select(
-            'quizaccess_cdexamsave_evt',
+            'quizaccess_cdexamcontrol_evt',
             "quizid = :quizid {$userwhere}",
             $params
         );
@@ -380,6 +385,9 @@ class report_service {
     ): ?array {
         global $DB, $USER;
 
+        if ($groupid < 0) {
+            throw new \moodle_exception('invalidgroup', 'quizaccess_cdexamcontrol');
+        }
         $groupmode = groups_get_activity_groupmode($cm);
         $canaccessallgroups = has_capability('moodle/site:accessallgroups', $context);
 
@@ -387,13 +395,17 @@ class report_service {
             $group = groups_get_group($groupid, 'id,courseid', MUST_EXIST);
             if (
                 (int) $group->courseid !== (int) $cm->course ||
+                (!empty($cm->groupingid) && !$DB->record_exists('groupings_groups', [
+                    'groupingid' => $cm->groupingid,
+                    'groupid' => $groupid,
+                ])) ||
                 (
                     $groupmode == SEPARATEGROUPS &&
                     !$canaccessallgroups &&
                     !groups_is_member($groupid, $USER->id)
                 )
             ) {
-                throw new \moodle_exception('invalidgroup', 'quizaccess_cdexamsave');
+                throw new \moodle_exception('invalidgroup', 'quizaccess_cdexamcontrol');
             }
             return array_map('intval', array_keys(groups_get_members($groupid, 'u.id')));
         }

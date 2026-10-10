@@ -14,30 +14,31 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+
+namespace quizaccess_cdexamcontrol;
+
+use quizaccess_cdexamcontrol\local\csv_export;
+
 /**
- * Event observers for CD Exam Control.
+ * Export regression checks for untrusted spreadsheet cells.
  *
  * @package    quizaccess_cdexamcontrol
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @coversDefaultClass \quizaccess_cdexamcontrol\local\csv_export
  */
-
-defined('MOODLE_INTERNAL') || die();
-
-$observers = [
-    [
-        'eventname' => '\\mod_quiz\\event\\attempt_submitted',
-        'callback' => '\\quizaccess_cdexamcontrol\\observer::attempt_finished',
-        'priority' => 9999,
-    ],
-    [
-        'eventname' => '\\mod_quiz\\event\\attempt_abandoned',
-        'callback' => '\\quizaccess_cdexamcontrol\\observer::attempt_finished',
-        'priority' => 9999,
-    ],
-    [
-        'eventname' => '\\mod_quiz\\event\\attempt_deleted',
-        'callback' => '\\quizaccess_cdexamcontrol\\observer::attempt_deleted',
-        'priority' => 9999,
-    ],
-];
+final class csv_export_test extends \advanced_testcase {
+    /**
+     * Leading whitespace must not hide a spreadsheet formula.
+     *
+     * @covers ::safe_cell
+     * @return void
+     */
+    public function test_formula_like_values_are_escaped(): void {
+        foreach (['=1+1', '+1', '-1', '@SUM(1)', " \t=1+1", "\n=1+1"] as $value) {
+            $this->assertSame("'" . $value, csv_export::safe_cell($value));
+        }
+        $this->assertSame('María Díaz', csv_export::safe_cell('María Díaz'));
+        $this->assertSame(' Ana', csv_export::safe_cell(' Ana'));
+    }
+}

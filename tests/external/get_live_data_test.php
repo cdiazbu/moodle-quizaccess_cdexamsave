@@ -14,17 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace quizaccess_cdexamsave\external;
+namespace quizaccess_cdexamcontrol\external;
 
 use core_external\external_api;
 
 /**
  * Tests for the AJAX live-report external function.
  *
- * @package    quizaccess_cdexamsave
+ * @package    quizaccess_cdexamcontrol
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @coversDefaultClass \quizaccess_cdexamsave\external\get_live_data
+ * @coversDefaultClass \quizaccess_cdexamcontrol\external\get_live_data
  */
 final class get_live_data_test extends \advanced_testcase {
     /**

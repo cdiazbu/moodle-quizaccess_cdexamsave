@@ -3,14 +3,14 @@
 /**
  * Near-real-time teacher report renderer.
  *
- * @module     quizaccess_cdexamsave/live_report
+ * @module     quizaccess_cdexamcontrol/live_report
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define(['core/ajax'], function(Ajax) {
     'use strict';
 
-    var METHOD_NAME = 'quizaccess_cdexamsave_get_live_data';
+    var METHOD_NAME = 'quizaccess_cdexamcontrol_get_live_data';
 
     /**
      * Create a cell with text-only content.
@@ -57,21 +57,21 @@ define(['core/ajax'], function(Ajax) {
         var knownIncidentIds = {};
         var participants = [];
         var elements = {
-            state: document.getElementById('cdexamsave-live-state'),
-            updated: document.getElementById('cdexamsave-updated'),
-            refresh: document.getElementById('cdexamsave-refresh'),
-            pause: document.getElementById('cdexamsave-pause'),
-            notifications: document.getElementById('cdexamsave-notifications'),
-            error: document.getElementById('cdexamsave-error'),
-            search: document.getElementById('cdexamsave-search'),
-            filter: document.getElementById('cdexamsave-filter'),
-            participants: document.getElementById('cdexamsave-participants-body'),
-            incidents: document.getElementById('cdexamsave-incidents-body'),
-            active: document.getElementById('cdexamsave-count-active'),
-            attention: document.getElementById('cdexamsave-count-attention'),
-            review: document.getElementById('cdexamsave-count-review'),
-            connected: document.getElementById('cdexamsave-count-connected'),
-            totalincidents: document.getElementById('cdexamsave-count-incidents')
+            state: document.getElementById('cdexamcontrol-live-state'),
+            updated: document.getElementById('cdexamcontrol-updated'),
+            refresh: document.getElementById('cdexamcontrol-refresh'),
+            pause: document.getElementById('cdexamcontrol-pause'),
+            notifications: document.getElementById('cdexamcontrol-notifications'),
+            error: document.getElementById('cdexamcontrol-error'),
+            search: document.getElementById('cdexamcontrol-search'),
+            filter: document.getElementById('cdexamcontrol-filter'),
+            participants: document.getElementById('cdexamcontrol-participants-body'),
+            incidents: document.getElementById('cdexamcontrol-incidents-body'),
+            active: document.getElementById('cdexamcontrol-count-active'),
+            attention: document.getElementById('cdexamcontrol-count-attention'),
+            review: document.getElementById('cdexamcontrol-count-review'),
+            connected: document.getElementById('cdexamcontrol-count-connected'),
+            totalincidents: document.getElementById('cdexamcontrol-count-incidents')
         };
 
         /**
@@ -114,16 +114,16 @@ define(['core/ajax'], function(Ajax) {
             }
             visible.forEach(function(participant) {
                 var row = document.createElement('tr');
-                row.className = 'cdexamsave-participant-' + participant.status;
+                row.className = 'cdexamcontrol-participant-' + participant.status;
                 if (participant.needsreview) {
-                    row.classList.add('cdexamsave-participant-review');
+                    row.classList.add('cdexamcontrol-participant-review');
                 }
                 row.appendChild(cell(participant.fullname, 'font-weight-bold'));
                 row.appendChild(cell(participant.attempt));
 
                 var connection = cell(participant.statustext);
                 var connectionBadge = document.createElement('span');
-                connectionBadge.className = 'cdexamsave-status cdexamsave-status-' + participant.status;
+                connectionBadge.className = 'cdexamcontrol-status cdexamcontrol-status-' + participant.status;
                 connectionBadge.textContent = participant.statustext;
                 connection.textContent = '';
                 connection.appendChild(connectionBadge);
@@ -136,7 +136,7 @@ define(['core/ajax'], function(Ajax) {
 
                 var review = cell(participant.reviewtext);
                 var reviewBadge = document.createElement('span');
-                reviewBadge.className = 'cdexamsave-review cdexamsave-review-' +
+                reviewBadge.className = 'cdexamcontrol-review cdexamcontrol-review-' +
                     (participant.needsreview ? 'recommended' : 'normal');
                 reviewBadge.textContent = participant.reviewtext;
                 review.textContent = '';
@@ -164,7 +164,7 @@ define(['core/ajax'], function(Ajax) {
             incidents.forEach(function(incident) {
                 var row = document.createElement('tr');
                 if (incident.active) {
-                    row.className = 'cdexamsave-incident-active';
+                    row.className = 'cdexamcontrol-incident-active';
                 }
                 row.appendChild(cell(incident.fullname, 'font-weight-bold'));
                 row.appendChild(cell(incident.attempt));
@@ -274,7 +274,7 @@ define(['core/ajax'], function(Ajax) {
         function togglePause() {
             paused = !paused;
             elements.state.textContent = paused ? config.strings.paused : config.strings.live;
-            elements.state.classList.toggle('cdexamsave-live-paused', paused);
+            elements.state.classList.toggle('cdexamcontrol-live-paused', paused);
             elements.pause.textContent = paused ? config.strings.resume : config.strings.pause;
             if (paused) {
                 window.clearTimeout(timer);

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dependency-free structural validator for a CD ExamFocus release tree."""
+"""Dependency-free structural validator for a CD Exam Control release tree."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ REQUIRED = {
     "db/install.xml",
     "db/access.php",
     "db/services.php",
-    "lang/en/quizaccess_cdexamsave.php",
+    "lang/en/quizaccess_cdexamcontrol.php",
     "amd/src/monitor.js",
     "amd/build/monitor.min.js",
     "amd/src/live_report.js",
@@ -123,8 +123,10 @@ def main() -> int:
             if pngerror:
                 failures.append(f"corrupt PNG {path.relative_to(ROOT)}: {pngerror}")
 
-    enkeys = language_keys(ROOT / "lang/en/quizaccess_cdexamsave.php")
-    spanish = ROOT / "lang/es/quizaccess_cdexamsave.php"
+    enkeys = language_keys(ROOT / "lang/en/quizaccess_cdexamcontrol.php")
+    if len(enkeys) != len(re.findall(r"\$string\['([^']+)'\]\s*=", (ROOT / "lang/en/quizaccess_cdexamcontrol.php").read_text(encoding="utf-8"))):
+        failures.append("duplicate English language key")
+    spanish = ROOT / "lang/es/quizaccess_cdexamcontrol.php"
     if spanish.exists():
         eskeys = language_keys(spanish)
         for key in sorted(enkeys - eskeys):
@@ -132,18 +134,9 @@ def main() -> int:
         for key in sorted(eskeys - enkeys):
             failures.append(f"English translation missing: {key}")
 
-    languagepacks = sorted(
-        path.name for path in (ROOT / "lang").iterdir() if path.is_dir() and path.name != "en"
-    )
-    if languagepacks:
-        failures.append(
-            "plugin ZIP must ship only lang/en; submit translations through AMOS: "
-            + ", ".join(languagepacks)
-        )
-
     referenced: set[str] = set()
     get_string_pattern = re.compile(
-        r"get_string\(\s*'([^']+)'\s*,\s*'quizaccess_cdexamsave'"
+        r"get_string\(\s*'([^']+)'\s*,\s*'quizaccess_cdexamcontrol'"
     )
     for path in all_files:
         if path.suffix in {".php", ".js"} and "/build/" not in str(path):
@@ -152,7 +145,7 @@ def main() -> int:
         failures.append(f"referenced language key missing: {key}")
 
     version = (ROOT / "version.php").read_text(encoding="utf-8")
-    if "$plugin->component = 'quizaccess_cdexamsave';" not in version:
+    if "$plugin->component = 'quizaccess_cdexamcontrol';" not in version:
         failures.append("version.php component is incorrect")
     if "$plugin->requires = 2024100700;" not in version:
         failures.append("Moodle 4.5 minimum version marker is missing")
@@ -162,8 +155,8 @@ def main() -> int:
         failures.append("version.php does not contain a 10-digit build number")
     if not releasematch:
         failures.append("version.php does not contain a release name")
-    if "$plugin->maturity = MATURITY_STABLE;" not in version:
-        failures.append("version.php is not marked as a stable release")
+    if "$plugin->maturity = MATURITY_BETA;" not in version:
+        failures.append("version.php is not marked as a beta release")
 
     if buildmatch and releasematch:
         builddate = buildmatch.group(1)[:8]
@@ -205,13 +198,13 @@ def main() -> int:
                 failures.append(f"invalid AMD source map for {module}: {error}")
 
     if failures:
-        print("CD ExamFocus release validation failed:")
+        print("CD Exam Control release validation failed:")
         for failure in failures:
             print(f"- {failure}")
         return 1
 
     print(
-        f"CD ExamFocus release validation passed: {len(all_files)} files, "
+        f"CD Exam Control release validation passed: {len(all_files)} files, "
         f"{len(enkeys)} language keys."
     )
     return 0

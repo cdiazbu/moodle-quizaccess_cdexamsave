@@ -15,13 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Restore support for per-quiz CD ExamFocus settings.
+ * Restore support for per-quiz CD Exam Control settings.
  *
- * @package    quizaccess_cdexamsave
+ * @package    quizaccess_cdexamcontrol
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class restore_quizaccess_cdexamsave_subplugin extends restore_mod_quiz_access_subplugin {
+class restore_quizaccess_cdexamcontrol_subplugin extends restore_mod_quiz_access_subplugin {
     /**
      * Define the settings restore path.
      *
@@ -30,8 +30,8 @@ class restore_quizaccess_cdexamsave_subplugin extends restore_mod_quiz_access_su
     protected function define_quiz_subplugin_structure() {
         return [
             new restore_path_element(
-                'cdexamsave_setting',
-                $this->get_pathfor('/cdexamsave_setting')
+                'cdexamcontrol_setting',
+                $this->get_pathfor('/cdexamcontrol_setting')
             ),
         ];
     }
@@ -42,21 +42,24 @@ class restore_quizaccess_cdexamsave_subplugin extends restore_mod_quiz_access_su
      * @param array $data Restored XML values.
      * @return void
      */
-    public function process_cdexamsave_setting($data): void {
+    public function process_cdexamcontrol_setting($data): void {
         global $DB;
 
         $record = (object) $data;
         unset($record->id);
+        // Older beta backups may lack these fields. Keep their former behaviour.
+        $record->requirefullscreen = (int) ($record->requirefullscreen ?? 1) ? 1 : 0;
+        $record->blockshortcuts = (int) ($record->blockshortcuts ?? 1) ? 1 : 0;
         $record->quizid = $this->get_new_parentid('quiz');
         $record->timecreated = time();
         $record->timemodified = time();
 
-        $existing = $DB->get_record('quizaccess_cdexamsave', ['quizid' => $record->quizid]);
+        $existing = $DB->get_record('quizaccess_cdexamcontrol', ['quizid' => $record->quizid]);
         if ($existing) {
             $record->id = $existing->id;
-            $DB->update_record('quizaccess_cdexamsave', $record);
+            $DB->update_record('quizaccess_cdexamcontrol', $record);
         } else {
-            $DB->insert_record('quizaccess_cdexamsave', $record);
+            $DB->insert_record('quizaccess_cdexamcontrol', $record);
         }
     }
 }

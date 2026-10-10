@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a deterministic CD ExamFocus Marketplace ZIP from Git files."""
+"""Build a deterministic CD Exam Control Marketplace ZIP from Git files."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-TOP_LEVEL = "cdexamsave"
+TOP_LEVEL = "cdexamcontrol"
 EXCLUDED_PREFIXES = (".github/",)
 
 
@@ -66,7 +66,7 @@ def build(output: Path) -> tuple[int, str]:
             archive.writestr(info, path.read_bytes(), compress_type=zipfile.ZIP_DEFLATED, compresslevel=9)
 
     digest = hashlib.sha256(output.read_bytes()).hexdigest()
-    expected = f"CD-ExamFocus-{release}.zip"
+    expected = f"CD-Exam-Control-{release}.zip"
     if output.name != expected:
         print(f"Note: canonical release filename is {expected}.", file=sys.stderr)
     return len(files), digest
@@ -79,7 +79,7 @@ def main() -> int:
     parser.add_argument(
         "--output",
         type=Path,
-        default=ROOT.parent / f"CD-ExamFocus-{release}.zip",
+        default=ROOT.parent / f"CD-Exam-Control-{release}.zip",
         help="Destination ZIP path",
     )
     args = parser.parse_args()

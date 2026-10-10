@@ -17,7 +17,7 @@
 /**
  * Teacher-facing live report.
  *
- * @package    quizaccess_cdexamsave
+ * @package    quizaccess_cdexamcontrol
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,62 +30,62 @@ $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
 $quiz = $DB->get_record('quiz', ['id' => $cm->instance], '*', MUST_EXIST);
 require_login($course, false, $cm);
 $context = context_module::instance($cm->id);
-require_capability('quizaccess/cdexamsave:viewreport', $context);
+require_capability('quizaccess/cdexamcontrol:viewreport', $context);
 
 $groupid = groups_get_activity_group($cm, true);
-$url = new moodle_url('/mod/quiz/accessrule/cdexamsave/report.php', ['cmid' => $cm->id]);
+$url = new moodle_url('/mod/quiz/accessrule/cdexamcontrol/report.php', ['cmid' => $cm->id]);
 $PAGE->set_url($url);
 $PAGE->set_context($context);
 $PAGE->set_course($course);
 $PAGE->set_cm($cm);
 $PAGE->set_pagelayout('report');
-$PAGE->set_title(get_string('reportfor', 'quizaccess_cdexamsave', format_string($quiz->name)));
+$PAGE->set_title(get_string('reportfor', 'quizaccess_cdexamcontrol', format_string($quiz->name)));
 $PAGE->set_heading(format_string($course->fullname));
 
-$refreshseconds = (int) get_config('quizaccess_cdexamsave', 'reportrefresh');
+$refreshseconds = (int) get_config('quizaccess_cdexamcontrol', 'reportrefresh');
 $refreshseconds = max(2, min(30, $refreshseconds ?: 3));
 $exportparams = [
     'cmid' => $cm->id,
     'group' => $groupid,
 ];
 $incidentexporturl = new moodle_url(
-    '/mod/quiz/accessrule/cdexamsave/export.php',
+    '/mod/quiz/accessrule/cdexamcontrol/export.php',
     $exportparams + ['mode' => 'incidents']
 );
 $summaryexporturl = new moodle_url(
-    '/mod/quiz/accessrule/cdexamsave/export.php',
+    '/mod/quiz/accessrule/cdexamcontrol/export.php',
     $exportparams + ['mode' => 'summary']
 );
-$PAGE->requires->js_call_amd('quizaccess_cdexamsave/live_report', 'init', [[
+$PAGE->requires->js_call_amd('quizaccess_cdexamcontrol/live_report', 'init', [[
     'cmId' => (int) $cm->id,
     'groupId' => (int) $groupid,
     'refreshMs' => $refreshseconds * 1000,
     'strings' => [
-        'live' => get_string('live', 'quizaccess_cdexamsave'),
-        'paused' => get_string('paused', 'quizaccess_cdexamsave'),
-        'lastUpdated' => get_string('lastupdated', 'quizaccess_cdexamsave', '{$a}'),
-        'pause' => get_string('pauserefresh', 'quizaccess_cdexamsave'),
-        'resume' => get_string('resumerefresh', 'quizaccess_cdexamsave'),
-        'notificationsEnabled' => get_string('notificationsenabled', 'quizaccess_cdexamsave'),
-        'notificationsDenied' => get_string('notificationsdenied', 'quizaccess_cdexamsave'),
-        'notificationTitle' => get_string('notificationtitle', 'quizaccess_cdexamsave'),
-        'notificationBody' => get_string('notificationbody', 'quizaccess_cdexamsave', (object) [
+        'live' => get_string('live', 'quizaccess_cdexamcontrol'),
+        'paused' => get_string('paused', 'quizaccess_cdexamcontrol'),
+        'lastUpdated' => get_string('lastupdated', 'quizaccess_cdexamcontrol', '{$a}'),
+        'pause' => get_string('pauserefresh', 'quizaccess_cdexamcontrol'),
+        'resume' => get_string('resumerefresh', 'quizaccess_cdexamcontrol'),
+        'notificationsEnabled' => get_string('notificationsenabled', 'quizaccess_cdexamcontrol'),
+        'notificationsDenied' => get_string('notificationsdenied', 'quizaccess_cdexamcontrol'),
+        'notificationTitle' => get_string('notificationtitle', 'quizaccess_cdexamcontrol'),
+        'notificationBody' => get_string('notificationbody', 'quizaccess_cdexamcontrol', (object) [
             'student' => '{$student}',
             'reason' => '{$reason}',
         ]),
-        'noAttempts' => get_string('noactiveattempts', 'quizaccess_cdexamsave'),
-        'noFilteredAttempts' => get_string('nofilteredattempts', 'quizaccess_cdexamsave'),
-        'noIncidents' => get_string('noincidents', 'quizaccess_cdexamsave'),
-        'pollError' => get_string('pollerror', 'quizaccess_cdexamsave'),
+        'noAttempts' => get_string('noactiveattempts', 'quizaccess_cdexamcontrol'),
+        'noFilteredAttempts' => get_string('nofilteredattempts', 'quizaccess_cdexamcontrol'),
+        'noIncidents' => get_string('noincidents', 'quizaccess_cdexamcontrol'),
+        'pollError' => get_string('pollerror', 'quizaccess_cdexamcontrol'),
     ],
 ]]);
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('livereport', 'quizaccess_cdexamsave'));
-echo html_writer::tag('p', get_string('reportintro', 'quizaccess_cdexamsave'), ['class' => 'lead']);
+echo $OUTPUT->heading(get_string('livereport', 'quizaccess_cdexamcontrol'));
+echo html_writer::tag('p', get_string('reportintro', 'quizaccess_cdexamcontrol'), ['class' => 'lead']);
 
-if (!$DB->record_exists('quizaccess_cdexamsave', ['quizid' => $quiz->id, 'enabled' => 1])) {
-    echo $OUTPUT->notification(get_string('reportdisabled', 'quizaccess_cdexamsave'), 'warning');
+if (!$DB->record_exists('quizaccess_cdexamcontrol', ['quizid' => $quiz->id, 'enabled' => 1])) {
+    echo $OUTPUT->notification(get_string('reportdisabled', 'quizaccess_cdexamcontrol'), 'warning');
 }
 
 if (groups_get_activity_groupmode($cm)) {
@@ -94,34 +94,34 @@ if (groups_get_activity_groupmode($cm)) {
     echo html_writer::end_div();
 }
 
-echo html_writer::start_div('cdexamsave-report', ['id' => 'cdexamsave-report']);
-echo html_writer::start_div('cdexamsave-toolbar');
-echo html_writer::tag('span', get_string('live', 'quizaccess_cdexamsave'), [
-    'id' => 'cdexamsave-live-state',
-    'class' => 'cdexamsave-live-pill',
+echo html_writer::start_div('cdexamcontrol-report', ['id' => 'cdexamcontrol-report']);
+echo html_writer::start_div('cdexamcontrol-toolbar');
+echo html_writer::tag('span', get_string('live', 'quizaccess_cdexamcontrol'), [
+    'id' => 'cdexamcontrol-live-state',
+    'class' => 'cdexamcontrol-live-pill',
 ]);
-echo html_writer::tag('span', '', ['id' => 'cdexamsave-updated', 'aria-live' => 'polite']);
-echo html_writer::start_div('cdexamsave-toolbar-actions');
-echo html_writer::tag('button', get_string('refreshnow', 'quizaccess_cdexamsave'), [
+echo html_writer::tag('span', '', ['id' => 'cdexamcontrol-updated', 'aria-live' => 'polite']);
+echo html_writer::start_div('cdexamcontrol-toolbar-actions');
+echo html_writer::tag('button', get_string('refreshnow', 'quizaccess_cdexamcontrol'), [
     'type' => 'button',
-    'id' => 'cdexamsave-refresh',
+    'id' => 'cdexamcontrol-refresh',
     'class' => 'btn btn-secondary',
 ]);
-echo html_writer::tag('button', get_string('pauserefresh', 'quizaccess_cdexamsave'), [
+echo html_writer::tag('button', get_string('pauserefresh', 'quizaccess_cdexamcontrol'), [
     'type' => 'button',
-    'id' => 'cdexamsave-pause',
+    'id' => 'cdexamcontrol-pause',
     'class' => 'btn btn-outline-secondary',
 ]);
-echo html_writer::tag('button', get_string('enablenotifications', 'quizaccess_cdexamsave'), [
+echo html_writer::tag('button', get_string('enablenotifications', 'quizaccess_cdexamcontrol'), [
     'type' => 'button',
-    'id' => 'cdexamsave-notifications',
+    'id' => 'cdexamcontrol-notifications',
     'class' => 'btn btn-outline-secondary',
 ]);
-if (has_capability('quizaccess/cdexamsave:exportreport', $context)) {
-    echo html_writer::link($summaryexporturl, get_string('exportsummarycsv', 'quizaccess_cdexamsave'), [
+if (has_capability('quizaccess/cdexamcontrol:exportreport', $context)) {
+    echo html_writer::link($summaryexporturl, get_string('exportsummarycsv', 'quizaccess_cdexamcontrol'), [
         'class' => 'btn btn-primary',
     ]);
-    echo html_writer::link($incidentexporturl, get_string('exportincidentscsv', 'quizaccess_cdexamsave'), [
+    echo html_writer::link($incidentexporturl, get_string('exportincidentscsv', 'quizaccess_cdexamcontrol'), [
         'class' => 'btn btn-outline-primary',
     ]);
 }
@@ -129,7 +129,7 @@ echo html_writer::end_div();
 echo html_writer::end_div();
 
 echo html_writer::div('', 'alert alert-danger d-none', [
-    'id' => 'cdexamsave-error',
+    'id' => 'cdexamcontrol-error',
     'role' => 'alert',
 ]);
 
@@ -140,48 +140,48 @@ $cards = [
     'connected' => 'connectedattempts',
     'incidents' => 'totalincidents',
 ];
-echo html_writer::start_div('cdexamsave-summary');
+echo html_writer::start_div('cdexamcontrol-summary');
 foreach ($cards as $id => $stringkey) {
-    echo html_writer::start_div('cdexamsave-card cdexamsave-card-' . $id);
+    echo html_writer::start_div('cdexamcontrol-card cdexamcontrol-card-' . $id);
     echo html_writer::tag('span', '0', [
-        'id' => 'cdexamsave-count-' . $id,
-        'class' => 'cdexamsave-card-value',
+        'id' => 'cdexamcontrol-count-' . $id,
+        'class' => 'cdexamcontrol-card-value',
     ]);
-    echo html_writer::tag('span', get_string($stringkey, 'quizaccess_cdexamsave'), [
-        'class' => 'cdexamsave-card-label',
+    echo html_writer::tag('span', get_string($stringkey, 'quizaccess_cdexamcontrol'), [
+        'class' => 'cdexamcontrol-card-label',
     ]);
     echo html_writer::end_div();
 }
 echo html_writer::end_div();
 
-echo html_writer::tag('h3', get_string('participants', 'quizaccess_cdexamsave'), ['class' => 'mt-4']);
-echo html_writer::start_div('cdexamsave-filters');
-echo html_writer::tag('label', get_string('searchattempts', 'quizaccess_cdexamsave'), [
-    'for' => 'cdexamsave-search',
+echo html_writer::tag('h3', get_string('participants', 'quizaccess_cdexamcontrol'), ['class' => 'mt-4']);
+echo html_writer::start_div('cdexamcontrol-filters');
+echo html_writer::tag('label', get_string('searchattempts', 'quizaccess_cdexamcontrol'), [
+    'for' => 'cdexamcontrol-search',
     'class' => 'sr-only',
 ]);
 echo html_writer::empty_tag('input', [
     'type' => 'search',
-    'id' => 'cdexamsave-search',
+    'id' => 'cdexamcontrol-search',
     'class' => 'form-control',
-    'placeholder' => get_string('searchattemptsplaceholder', 'quizaccess_cdexamsave'),
+    'placeholder' => get_string('searchattemptsplaceholder', 'quizaccess_cdexamcontrol'),
 ]);
-echo html_writer::tag('label', get_string('filterlabel', 'quizaccess_cdexamsave'), [
-    'for' => 'cdexamsave-filter',
+echo html_writer::tag('label', get_string('filterlabel', 'quizaccess_cdexamcontrol'), [
+    'for' => 'cdexamcontrol-filter',
     'class' => 'sr-only',
 ]);
 echo html_writer::select([
-    'all' => get_string('filterall', 'quizaccess_cdexamsave'),
-    'review' => get_string('filterreview', 'quizaccess_cdexamsave'),
-    'attention' => get_string('filterattention', 'quizaccess_cdexamsave'),
-    'disconnected' => get_string('filterdisconnected', 'quizaccess_cdexamsave'),
-], 'cdexamsave-filter', 'all', false, [
-    'id' => 'cdexamsave-filter',
+    'all' => get_string('filterall', 'quizaccess_cdexamcontrol'),
+    'review' => get_string('filterreview', 'quizaccess_cdexamcontrol'),
+    'attention' => get_string('filterattention', 'quizaccess_cdexamcontrol'),
+    'disconnected' => get_string('filterdisconnected', 'quizaccess_cdexamcontrol'),
+], 'cdexamcontrol-filter', 'all', false, [
+    'id' => 'cdexamcontrol-filter',
     'class' => 'custom-select',
 ]);
 echo html_writer::end_div();
 echo html_writer::start_div('table-responsive');
-echo html_writer::start_tag('table', ['class' => 'table table-striped cdexamsave-table']);
+echo html_writer::start_tag('table', ['class' => 'table table-striped cdexamcontrol-table']);
 echo html_writer::start_tag('thead');
 echo html_writer::start_tag('tr');
 foreach (
@@ -196,30 +196,30 @@ foreach (
         'lastheartbeat',
     ] as $key
 ) {
-    echo html_writer::tag('th', get_string($key, 'quizaccess_cdexamsave'), ['scope' => 'col']);
+    echo html_writer::tag('th', get_string($key, 'quizaccess_cdexamcontrol'), ['scope' => 'col']);
 }
 echo html_writer::end_tag('tr');
 echo html_writer::end_tag('thead');
-echo html_writer::tag('tbody', '', ['id' => 'cdexamsave-participants-body']);
+echo html_writer::tag('tbody', '', ['id' => 'cdexamcontrol-participants-body']);
 echo html_writer::end_tag('table');
 echo html_writer::end_div();
 
-echo html_writer::tag('h3', get_string('recentincidents', 'quizaccess_cdexamsave'), ['class' => 'mt-4']);
+echo html_writer::tag('h3', get_string('recentincidents', 'quizaccess_cdexamcontrol'), ['class' => 'mt-4']);
 echo html_writer::start_div('table-responsive');
-echo html_writer::start_tag('table', ['class' => 'table table-sm table-hover cdexamsave-table']);
+echo html_writer::start_tag('table', ['class' => 'table table-sm table-hover cdexamcontrol-table']);
 echo html_writer::start_tag('thead');
 echo html_writer::start_tag('tr');
 foreach (['student', 'attempt', 'started', 'ended', 'duration', 'reason'] as $key) {
-    echo html_writer::tag('th', get_string($key, 'quizaccess_cdexamsave'), ['scope' => 'col']);
+    echo html_writer::tag('th', get_string($key, 'quizaccess_cdexamcontrol'), ['scope' => 'col']);
 }
 echo html_writer::end_tag('tr');
 echo html_writer::end_tag('thead');
-echo html_writer::tag('tbody', '', ['id' => 'cdexamsave-incidents-body']);
+echo html_writer::tag('tbody', '', ['id' => 'cdexamcontrol-incidents-body']);
 echo html_writer::end_tag('table');
 echo html_writer::end_div();
 
-echo html_writer::div(get_string('reviewdisclaimer', 'quizaccess_cdexamsave'), 'alert alert-info mt-4');
-echo html_writer::div(get_string('privacywarning', 'quizaccess_cdexamsave'), 'alert alert-light mt-4');
-echo html_writer::tag('noscript', get_string('noscript', 'quizaccess_cdexamsave'), ['class' => 'alert alert-warning']);
+echo html_writer::div(get_string('reviewdisclaimer', 'quizaccess_cdexamcontrol'), 'alert alert-info mt-4');
+echo html_writer::div(get_string('privacywarning', 'quizaccess_cdexamcontrol'), 'alert alert-light mt-4');
+echo html_writer::tag('noscript', get_string('noscript', 'quizaccess_cdexamcontrol'), ['class' => 'alert alert-warning']);
 echo html_writer::end_div();
 echo $OUTPUT->footer();

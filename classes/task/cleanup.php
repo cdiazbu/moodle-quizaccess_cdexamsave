@@ -14,12 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace quizaccess_cdexamsave\task;
+namespace quizaccess_cdexamcontrol\task;
 
 /**
  * Deletes monitoring data after the configured retention period.
  *
- * @package    quizaccess_cdexamsave
+ * @package    quizaccess_cdexamcontrol
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -33,7 +33,7 @@ class cleanup extends \core\task\scheduled_task {
      * @return string
      */
     public function get_name(): string {
-        return get_string('taskcleanup', 'quizaccess_cdexamsave');
+        return get_string('taskcleanup', 'quizaccess_cdexamcontrol');
     }
 
     /**
@@ -44,12 +44,12 @@ class cleanup extends \core\task\scheduled_task {
     public function execute(): void {
         global $DB;
 
-        $retentiondays = (int) get_config('quizaccess_cdexamsave', 'retentiondays');
-        $retentiondays = max(1, $retentiondays ?: 180);
+        $retentiondays = (int) get_config('quizaccess_cdexamcontrol', 'retentiondays');
+        $retentiondays = max(1, min(3650, $retentiondays ?: 180));
         $cutoff = time() - ($retentiondays * DAYSECS);
 
-        self::delete_expired_in_batches('quizaccess_cdexamsave_evt', 'timecreated', $cutoff);
-        self::delete_expired_in_batches('quizaccess_cdexamsave_sess', 'timemodified', $cutoff);
+        self::delete_expired_in_batches('quizaccess_cdexamcontrol_evt', 'timecreated', $cutoff);
+        self::delete_expired_in_batches('quizaccess_cdexamctrl_sess', 'timemodified', $cutoff);
     }
 
     /**
@@ -65,12 +65,17 @@ class cleanup extends \core\task\scheduled_task {
         global $DB;
 
         do {
-            $records = $DB->get_records_select(
-                $table,
-                "{$timefield} < :cutoff",
-                ['cutoff' => $cutoff],
-                'id ASC',
-                'id',
+            $records = $DB->get_records_sql(
+                "SELECT data.id
+                   FROM {{$table}} data
+                  WHERE data.{$timefield} < :cutoff
+                    AND NOT EXISTS (
+                        SELECT 1 FROM {quiz_attempts} qa
+                         WHERE qa.id = data.attemptid
+                           AND (qa.state = :inprogress OR qa.state = :overdue)
+                    )
+               ORDER BY data.id ASC",
+                ['cutoff' => $cutoff, 'inprogress' => 'inprogress', 'overdue' => 'overdue'],
                 0,
                 self::BATCH_SIZE
             );

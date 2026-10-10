@@ -1,432 +1,515 @@
 // This file is part of Moodle - http://moodle.org/
 
 /**
- * Browser-side focus monitor for active quiz attempts.
+ * Browser observations and accessible controls for an active quiz attempt.
  *
- * @module     quizaccess_cdexamsave/monitor
+ * @module     quizaccess_cdexamcontrol/monitor
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define(['core/ajax'], function(Ajax) {
     'use strict';
 
-    var MAX_QUEUE_ITEMS = 100;
-    var MAX_QUEUE_AGE_MS = 24 * 60 * 60 * 1000;
-    var METHOD_NAME = 'quizaccess_cdexamsave_record_signal';
+    var METHOD = 'quizaccess_cdexamcontrol_record_signal';
+    var MAX_ITEMS = 100;
+    var MAX_AGE = 30 * 60 * 1000;
 
     /**
-     * Generate a standards-compliant random UUID v4.
+     * Return a random UUID without recording a device fingerprint.
      *
      * @return {String}
      */
     function uuid() {
-        if (window.crypto && typeof window.crypto.randomUUID === 'function') {
-            return window.crypto.randomUUID();
-        }
         var bytes = new Uint8Array(16);
         window.crypto.getRandomValues(bytes);
-        bytes[6] = (bytes[6] % 16) + 64;
-        bytes[8] = (bytes[8] % 64) + 128;
-        return Array.from(bytes, function(byte) {
-            return byte.toString(16).padStart(2, '0');
+        bytes[6] = (bytes[6] & 15) | 64;
+        bytes[8] = (bytes[8] & 63) | 128;
+        return Array.from(bytes, function(value) {
+            return value.toString(16).padStart(2, '0');
         }).join('').replace(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/, '$1-$2-$3-$4-$5');
     }
 
     /**
-     * Create a configured monitor instance.
+     * Create one monitor. Browser controls are advisory, never an OS lock.
      *
-     * @param {Object} config Server-supplied configuration.
+     * @param {Object} config Server configuration.
      * @return {Object}
      */
     function createMonitor(config) {
-        var pagesessionid = uuid();
-        var queuekey = 'quizaccess_cdexamsave_queue_v1';
-        var endpoint = M.cfg.wwwroot + '/lib/ajax/service.php?sesskey=' +
-            encodeURIComponent(M.cfg.sesskey) + '&info=' + METHOD_NAME;
-        var currentloss = null;
-        var intentionalnavigation = false;
-        var heartbeattimer = null;
+        var session = uuid();
+        var key = 'quizaccess_cdexamcontrol_v2_' + config.userId + '_' + config.attemptId;
+        var queue = [];
+        var draining = null;
+        var initialised = false;
+        var stopped = false;
+        var loss = null;
+        var navigation = false;
+        var heartbeat = null;
+        var gate = null;
+        var warning = null;
+        var enteredFullscreen = false;
+        var fullscreenSupported = document.fullscreenEnabled !== false &&
+            typeof document.documentElement.requestFullscreen === 'function';
+        var badge = document.createElement('div');
+        badge.className = 'cdexamcontrol-monitor-badge';
+        badge.setAttribute('role', 'status');
+        badge.setAttribute('aria-live', 'polite');
 
         /**
-         * Read the bounded retry queue.
+         * Reflect acknowledgement and pending delivery accurately.
          *
-         * @return {Array}
+         * @param {String} message Optional operational message.
          */
-        function readQueue() {
+        function status(message) {
+            badge.textContent = message || (stopped ? config.strings.stopped :
+                (queue.length >= MAX_ITEMS ? config.strings.queueFull :
+                    (queue.length ? config.strings.pending :
+                        (!fullscreenSupported && config.requireFullscreen ? config.strings.fullscreenUnsupported :
+                            (initialised ? config.strings.badge : config.strings.connecting)))));
+        }
+
+        /**
+         * Keep the active queue head stable while bounded messages are pending.
+         *
+         * @param {Object} complete Collector payload.
+         */
+        function append(complete) {
+            if (queue.length >= MAX_ITEMS) {
+                status(config.strings.queueFull);
+                return;
+            }
+            queue.push({payload: complete, queuedat: Date.now()});
+            persist();
+        }
+
+
+        /**
+         * Persist only this user's attempt in this tab, without a session key.
+         */
+        function persist() {
             try {
-                var value = JSON.parse(localStorage.getItem(queuekey) || '[]');
-                return Array.isArray(value) ? value : [];
+                window.sessionStorage.setItem(key, JSON.stringify(queue));
             } catch (error) {
-                return [];
+                // Online collection continues when browser storage is disabled.
             }
         }
 
-        /**
-         * Persist the retry queue without interrupting the attempt if storage
-         * is disabled by the browser.
-         *
-         * @param {Array} queue Queue items.
-         */
-        function writeQueue(queue) {
-            try {
-                localStorage.setItem(queuekey, JSON.stringify(queue.slice(-MAX_QUEUE_ITEMS)));
-            } catch (error) {
-                // Monitoring still works online when storage is unavailable.
+        try {
+            var saved = JSON.parse(window.sessionStorage.getItem(key) || '[]');
+            if (Array.isArray(saved)) {
+                queue = saved.filter(function(item) {
+                    return item && item.payload &&
+                        item.payload.attemptid === config.attemptId && item.payload.cmid === config.cmId &&
+                        ['lost', 'returned', 'observed'].includes(item.payload.action) &&
+                        typeof item.queuedat === 'number' && Date.now() - item.queuedat >= 0 &&
+                        Date.now() - item.queuedat < MAX_AGE;
+                }).slice(-MAX_ITEMS);
             }
+        } catch (error) {
+            // Storage is optional.
         }
 
         /**
-         * Queue a failed network payload.
+         * Add request identity. Moodle validates ownership on the server.
          *
-         * @param {Object} payload Collector payload.
-         */
-        function enqueue(payload) {
-            var queue = readQueue();
-            queue.push({payload: payload, queuedat: Date.now(), attempts: 0});
-            writeQueue(queue);
-        }
-
-        /**
-         * Add common identity fields to a collector message.
-         *
-         * @param {Object} payload Signal-specific values.
+         * @param {Object} data Observation-specific values.
          * @return {Object}
          */
-        function completePayload(payload) {
+        function payload(data) {
             return Object.assign({
                 attemptid: config.attemptId,
                 cmid: config.cmId,
-                pagesessionid: pagesessionid,
+                pagesessionid: session,
                 clienttime: Math.floor(Date.now() / 1000)
-            }, payload);
+            }, data);
         }
 
         /**
-         * Send one signal through Moodle's AJAX external-service API. Beacon
-         * transport is retained for page lifecycle events so a tab closure is
-         * less likely to lose the final signal.
+         * Make an acknowledged Moodle AJAX request.
          *
-         * @param {Object} payload Complete collector payload.
-         * @param {Boolean} beacon Prefer sendBeacon for page lifecycle events.
-         * @param {Boolean} queueonfailure Whether to persist on failure.
+         * @param {Object} data Complete payload.
          * @return {Promise}
          */
-        function send(payload, beacon, queueonfailure) {
-            var body = JSON.stringify([{
-                index: 0,
-                methodname: METHOD_NAME,
-                args: payload
-            }]);
-            if (beacon && navigator.sendBeacon) {
-                var accepted = navigator.sendBeacon(
-                    endpoint,
-                    new Blob([body], {type: 'application/json'})
-                );
-                if (accepted) {
-                    return Promise.resolve();
+        function request(data) {
+            return Promise.resolve(Ajax.call([{methodname: METHOD, args: data}])[0]).then(function(result) {
+                if (!result || !result.accepted) {
+                    throw new Error('Observation not acknowledged');
                 }
-            }
-
-            var request;
-            if (beacon && window.fetch) {
-                request = fetch(endpoint, {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    cache: 'no-store',
-                    keepalive: true,
-                    headers: {'Content-Type': 'application/json'},
-                    body: body
-                }).then(function(response) {
-                    if (!response.ok) {
-                        throw new Error('External service request failed');
-                    }
-                    return response.json();
-                }).then(function(result) {
-                    if (result[0] && result[0].error) {
-                        throw new Error('External service rejected the signal');
-                    }
-                    return null;
-                });
-            } else {
-                request = Ajax.call([{
-                    methodname: METHOD_NAME,
-                    args: payload
-                }])[0].then(function() {
-                    return null;
-                });
-            }
-
-            return request.catch(function(error) {
-                if (queueonfailure) {
-                    enqueue(payload);
-                    return null;
-                }
-                throw error;
+                return result;
             });
         }
 
         /**
-         * Retry recent signals for this attempt.
+         * Initialise the current page, then drain observations in order.
+         * A failure keeps the head item; new items cannot overtake it.
          *
          * @return {Promise}
          */
-        function flushQueue() {
-            var now = Date.now();
-            var queue = readQueue();
-            var retained = [];
-            var requests = [];
-
-            queue.forEach(function(item) {
-                if (!item.payload || now - item.queuedat > MAX_QUEUE_AGE_MS || item.attempts >= 3) {
-                    return;
+        function drain() {
+            if (draining || stopped) {
+                return draining || Promise.resolve();
+            }
+            draining = Promise.resolve().then(function() {
+                if (!initialised) {
+                    return request(payload({action: 'init'})).then(function() {
+                        initialised = true;
+                    });
                 }
-                if (Number(item.payload.attemptid) !== Number(config.attemptId)) {
-                    retained.push(item);
-                    return;
-                }
-                item.attempts++;
-                requests.push(send(item.payload, false, false).catch(function() {
-                    retained.push(item);
-                }));
-            });
-            return Promise.all(requests).then(function() {
-                writeQueue(retained);
                 return null;
+            }).then(function next() {
+                if (!queue.length || stopped) {
+                    return null;
+                }
+                var item = queue[0];
+                if (Date.now() - item.queuedat >= MAX_AGE) {
+                    queue.shift();
+                    persist();
+                    return next();
+                }
+                return request(item.payload).then(function() {
+                    queue.shift();
+                    persist();
+                    return next();
+                });
+            }).catch(function(error) {
+                if (error && ['attemptnotmonitorable', 'monitoringdisabled', 'incidentlimitreached'].includes(error.errorcode)) {
+                    stopped = true;
+                    queue = [];
+                    persist();
+                    dismissGate();
+                    if (heartbeat) {
+                        window.clearInterval(heartbeat);
+                    }
+                }
+                // A connection failure must never interrupt answering or saving.
+            }).then(function() {
+                draining = null;
+                status();
             });
+            return draining;
         }
 
         /**
-         * Insert the visible monitoring status badge.
-         */
-        function addBadge() {
-            var badge = document.createElement('div');
-            badge.className = 'cdexamsave-monitor-badge';
-            badge.setAttribute('role', 'status');
-            badge.textContent = config.strings.badge;
-            document.body.appendChild(badge);
-        }
-
-        /**
-         * Show the student-facing incident acknowledgement.
+         * Queue a durable observation. A beacon is not an acknowledgement.
          *
-         * @param {Number} durationms Incident duration in milliseconds.
+         * @param {Object} data Observation values.
+         * @param {Boolean} beacon Also attempt lifecycle delivery.
          */
-        function showWarning(durationms) {
-            if (!config.warnStudent) {
+        function collect(data, beacon) {
+            if (stopped) {
                 return;
             }
-            var existing = document.getElementById('cdexamsave-student-warning');
-            if (existing) {
-                existing.remove();
+            var complete = payload(data);
+            append(complete);
+            status();
+            if (beacon && navigator.sendBeacon) {
+                try {
+                    var endpoint = M.cfg.wwwroot + '/lib/ajax/service.php?sesskey=' +
+                        encodeURIComponent(M.cfg.sesskey) + '&info=' + METHOD;
+                    navigator.sendBeacon(endpoint, new Blob([JSON.stringify([{
+                        index: 0, methodname: METHOD, args: complete
+                    }])], {type: 'application/json'}));
+                } catch (error) {
+                    // Retain the observation for an acknowledged retry.
+                }
             }
+            drain();
+        }
 
-            var overlay = document.createElement('div');
-            overlay.id = 'cdexamsave-student-warning';
-            overlay.className = 'cdexamsave-warning-overlay';
-            overlay.setAttribute('role', 'dialog');
-            overlay.setAttribute('aria-modal', 'true');
-            overlay.setAttribute('aria-labelledby', 'cdexamsave-warning-title');
+        /**
+         * Close the fullscreen prompt.
+         */
+        function dismissGate() {
+            if (gate) {
+                if (gate.open && typeof gate.close === 'function') {
+                    gate.close();
+                }
+                gate.remove();
+                gate = null;
+            }
+        }
 
-            var dialog = document.createElement('div');
-            dialog.className = 'cdexamsave-warning-dialog';
-            var title = document.createElement('h2');
-            title.id = 'cdexamsave-warning-title';
-            title.textContent = config.strings.warningTitle;
-            var text = document.createElement('p');
-            text.textContent = config.strings.warningText;
-            var duration = document.createElement('p');
-            duration.className = 'cdexamsave-warning-duration';
-            duration.textContent = config.strings.duration.replace(
-                '{$a}',
-                Math.max(1, Math.round(durationms / 1000)) + ' s'
-            );
+        /**
+         * Create a native dialog with focus containment and keyboard support.
+         *
+         * @param {String} title Dialog heading.
+         * @param {String} text Dialog message.
+         * @param {String} label Button label.
+         * @return {Object}
+         */
+        function dialog(title, text, label) {
+            var element = document.createElement('dialog');
+            element.className = 'cdexamcontrol-control-dialog';
+            var heading = document.createElement('h2');
+            heading.id = 'cdexamcontrol-dialog-' + uuid();
+            heading.textContent = title;
+            element.setAttribute('aria-labelledby', heading.id);
+            var paragraph = document.createElement('p');
+            paragraph.textContent = text;
             var button = document.createElement('button');
             button.type = 'button';
-            button.className = 'btn btn-primary btn-lg';
-            button.textContent = config.strings.continue;
-            button.addEventListener('click', function() {
-                overlay.remove();
-            });
-
-            dialog.appendChild(title);
-            dialog.appendChild(text);
-            dialog.appendChild(duration);
-            dialog.appendChild(button);
-            overlay.appendChild(dialog);
-            document.body.appendChild(overlay);
+            button.className = 'btn btn-primary';
+            button.textContent = label;
+            element.appendChild(heading);
+            element.appendChild(paragraph);
+            element.appendChild(button);
+            document.body.appendChild(element);
+            if (typeof element.showModal === 'function') {
+                element.showModal();
+            } else {
+                element.setAttribute('open', '');
+                element.setAttribute('role', 'dialog');
+            }
             button.focus();
+            return {element: element, button: button, message: paragraph};
         }
 
         /**
-         * Commit the current loss to the server.
+         * Ask for fullscreen through a user gesture, with recoverable failures.
+         */
+        function showGate() {
+            if (!config.requireFullscreen || gate || navigation || stopped || document.fullscreenElement) {
+                return;
+            }
+            if (!fullscreenSupported) {
+                status(config.strings.fullscreenUnsupported);
+                return;
+            }
+            if (warning) {
+                warning.close();
+                warning = null;
+            }
+            var view = dialog(config.strings.fullscreenTitle, config.strings.fullscreenText,
+                config.strings.fullscreenButton);
+            gate = view.element;
+            gate.addEventListener('cancel', function(event) {
+                event.preventDefault();
+            });
+            view.button.addEventListener('click', function() {
+                view.button.disabled = true;
+                // Invoke before any asynchronous work; browsers require a gesture.
+                var result;
+                try {
+                    result = document.documentElement.requestFullscreen();
+                } catch (error) {
+                    result = Promise.reject(error);
+                }
+                Promise.resolve(result).then(function() {
+                    if (document.fullscreenElement) {
+                        enteredFullscreen = true;
+                        dismissGate();
+                        checkFocus('fullscreen_exit', false);
+                    }
+                }).catch(function() {
+                    view.message.textContent = config.strings.fullscreenError;
+                }).then(function() {
+                    view.button.disabled = false;
+                });
+            });
+        }
+
+        /**
+         * Commit the current loss once after its grace period.
          *
-         * @param {Boolean} beacon Prefer beacon transport.
+         * @param {Boolean} beacon Lifecycle transport.
          */
         function commitLoss(beacon) {
-            if (!currentloss || currentloss.sent || intentionalnavigation) {
+            if (!loss || loss.sent || navigation || stopped) {
                 return;
             }
-            currentloss.sent = true;
-            send(completePayload({
-                action: 'lost',
-                eventuuid: currentloss.id,
-                reason: currentloss.reason,
-                clienttime: Math.floor(currentloss.startedat / 1000)
-            }), beacon, true);
+            loss.sent = true;
+            collect({
+                action: 'lost', eventuuid: loss.id, reason: loss.reason,
+                clienttime: Math.floor(loss.wallstart / 1000)
+            }, beacon);
         }
 
         /**
-         * Begin a possible focus-loss incident.
-         *
-         * @param {String} reason Detection reason.
-         * @param {Boolean} immediate Whether to bypass the grace timer.
+         * Complete a loss only after every monitored cause has ended.
          */
-        function loseFocus(reason, immediate) {
-            if (intentionalnavigation) {
+        function recover() {
+            if (!loss) {
                 return;
             }
-            if (currentloss) {
-                if (reason === 'visibility_hidden' || reason === 'pagehide' || reason === 'freeze') {
-                    currentloss.reason = reason;
-                }
-                if (immediate) {
-                    clearTimeout(currentloss.timer);
-                    commitLoss(true);
-                }
+            window.clearTimeout(loss.timer);
+            var ended = loss;
+            loss = null;
+            var milliseconds = Math.max(0, window.performance.now() - ended.start);
+            if (milliseconds < config.gracePeriodMs && !ended.sent) {
                 return;
             }
-            currentloss = {
-                id: uuid(),
-                reason: reason,
-                startedat: Date.now(),
-                sent: false,
-                timer: null
-            };
-            if (immediate || config.gracePeriodMs <= 0) {
-                commitLoss(true);
-            } else {
-                currentloss.timer = window.setTimeout(function() {
-                    commitLoss(true);
+            collect({
+                action: 'returned', eventuuid: ended.id, reason: ended.reason,
+                duration: Math.round(milliseconds / 1000)
+            }, false);
+            if (config.warnStudent && !gate && !stopped && !navigation) {
+                if (warning) {
+                    warning.close();
+                }
+                var view = dialog(config.strings.warningTitle, config.strings.warningText +
+                    ' ' + config.strings.duration.replace('{$a}', Math.round(milliseconds / 1000) + ' s'),
+                config.strings.continue);
+                warning = view.element;
+                view.button.addEventListener('click', function() {
+                    view.element.close();
+                });
+                view.element.addEventListener('close', function() {
+                    view.element.remove();
+                    warning = null;
+                });
+            }
+        }
+
+        /**
+         * Combine visibility, window focus and fullscreen without double counts.
+         *
+         * @param {String} reason Cause of this check.
+         * @param {Boolean} immediate Lifecycle events bypass the grace delay.
+         */
+        function checkFocus(reason, immediate) {
+            if (stopped || navigation ||
+                    (config.requireFullscreen && fullscreenSupported && !enteredFullscreen)) {
+                return;
+            }
+            var away = immediate || document.visibilityState === 'hidden' || !document.hasFocus() ||
+                (config.requireFullscreen && fullscreenSupported && enteredFullscreen && !document.fullscreenElement);
+            if (!away) {
+                recover();
+                return;
+            }
+            if (!loss) {
+                loss = {
+                    id: uuid(), reason: reason, start: window.performance.now(),
+                    wallstart: Date.now(), sent: false, timer: null
+                };
+                loss.timer = window.setTimeout(function() {
+                    commitLoss(false);
                 }, config.gracePeriodMs);
             }
+            if (immediate || config.gracePeriodMs === 0) {
+                window.clearTimeout(loss.timer);
+                commitLoss(immediate);
+            }
         }
 
         /**
-         * End and report the current incident.
+         * Prevent only optional new browsing contexts, preserving answer controls.
+         *
+         * @param {Event} event Browser event.
          */
-        function regainFocus() {
-            if (!currentloss || intentionalnavigation) {
+        function restrictContext(event) {
+            if (!config.blockShortcuts || stopped || navigation || event.defaultPrevented || event.repeat) {
                 return;
             }
-            clearTimeout(currentloss.timer);
-            var loss = currentloss;
-            var durationms = Math.max(0, Date.now() - loss.startedat);
-            currentloss = null;
-
-            if (durationms < config.gracePeriodMs && !loss.sent) {
-                return;
+            var keyboard = event.type === 'keydown' && (event.ctrlKey || event.metaKey) &&
+                !event.altKey && ['t', 'n'].includes(String(event.key).toLowerCase());
+            var anchor = event.target && event.target.closest ? event.target.closest('a[href]') : null;
+            var newcontext = ['click', 'auxclick'].includes(event.type) && anchor && !anchor.download && ((anchor.target && !['_self', '_top', '_parent'].includes(anchor.target)) ||
+                event.ctrlKey || event.metaKey || event.shiftKey || event.button === 1);
+            if (keyboard || newcontext) {
+                event.preventDefault();
+                if (!event.defaultPrevented) {
+                    return;
+                }
+                // A prevented request is an instantaneous observation, not time away.
+                collect({action: 'observed', eventuuid: uuid(), reason: 'shortcut_blocked'}, false);
+                status(config.strings.shortcut);
             }
-            if (!loss.sent) {
-                send(completePayload({
-                    action: 'lost',
-                    eventuuid: loss.id,
-                    reason: loss.reason,
-                    clienttime: Math.floor(loss.startedat / 1000)
-                }), false, true);
-            }
-            send(completePayload({
-                action: 'returned',
-                eventuuid: loss.id,
-                reason: loss.reason,
-                duration: Math.max(1, Math.round(durationms / 1000))
-            }), false, true);
-            showWarning(durationms);
         }
 
         /**
-         * Attach lifecycle listeners only after the init signal has been sent.
-         */
-        function attachListeners() {
-            document.addEventListener('visibilitychange', function() {
-                if (document.visibilityState === 'hidden') {
-                    loseFocus('visibility_hidden', false);
-                } else if (document.visibilityState === 'visible') {
-                    regainFocus();
-                }
-            });
-            window.addEventListener('blur', function() {
-                loseFocus('window_blur', false);
-            });
-            window.addEventListener('focus', function() {
-                if (document.visibilityState === 'visible') {
-                    regainFocus();
-                }
-            });
-            window.addEventListener('pagehide', function() {
-                loseFocus('pagehide', true);
-            });
-            window.addEventListener('pageshow', function() {
-                intentionalnavigation = false;
-                if (document.visibilityState === 'visible') {
-                    regainFocus();
-                }
-            });
-            document.addEventListener('freeze', function() {
-                loseFocus('freeze', true);
-            });
-            document.addEventListener('submit', function(event) {
-                intentionalnavigation = true;
-                if (currentloss) {
-                    clearTimeout(currentloss.timer);
-                    currentloss = null;
-                }
-                // If client-side validation cancels the navigation, resume
-                // monitoring instead of leaving the attempt unprotected.
-                window.setTimeout(function() {
-                    if (event.defaultPrevented) {
-                        intentionalnavigation = false;
-                    }
-                }, 0);
-            }, true);
-        }
-
-        /**
-         * Start the monitor and heartbeat loop.
+         * Start synchronously, before any network request can delay listeners.
          */
         function start() {
-            addBadge();
-            send(completePayload({action: 'init'}), false, false).catch(function() {
-                // A later heartbeat or incident will initialise the session.
-                return null;
-            }).then(function() {
-                attachListeners();
-                return flushQueue();
-            }).catch(function() {
-                return null;
+            document.body.appendChild(badge);
+            status();
+            document.addEventListener('visibilitychange', function() {
+                checkFocus('visibility_hidden', false);
             });
-            heartbeattimer = window.setInterval(function() {
-                if (document.visibilityState === 'visible') {
-                    send(completePayload({action: 'heartbeat'}), false, false);
+            window.addEventListener('blur', function() {
+                checkFocus('window_blur', false);
+            });
+            window.addEventListener('focus', function() {
+                checkFocus('window_blur', false);
+            });
+            document.addEventListener('fullscreenchange', function() {
+                if (document.fullscreenElement) {
+                    enteredFullscreen = true;
+                    dismissGate();
+                } else {
+                    showGate();
+                }
+                checkFocus('fullscreen_exit', false);
+            });
+            window.addEventListener('pagehide', function() {
+                checkFocus('pagehide', true);
+            });
+            window.addEventListener('pageshow', function() {
+                navigation = false;
+                checkFocus('pagehide', false);
+                showGate();
+                drain();
+            });
+            document.addEventListener('freeze', function() {
+                checkFocus('freeze', true);
+            });
+            window.addEventListener('online', drain);
+            document.addEventListener('submit', function(event) {
+                if (!event.target || event.target.id !== 'responseform') {
+                    return;
+                }
+                navigation = true;
+                if (loss) {
+                    window.clearTimeout(loss.timer);
+                    recover();
+                }
+                // Moodle's validation and AJAX handlers can cancel the navigation.
+                window.setTimeout(function() {
+                    if (event.defaultPrevented) {
+                        navigation = false;
+                        checkFocus('window_blur', false);
+                        showGate();
+                    }
+                }, 0);
+                window.setTimeout(function() {
+                    navigation = false;
+                }, 1500);
+            }, true);
+            document.addEventListener('keydown', restrictContext, true);
+            document.addEventListener('click', restrictContext, true);
+            document.addEventListener('auxclick', restrictContext, true);
+            drain();
+            showGate();
+            checkFocus('window_blur', false);
+            heartbeat = window.setInterval(function() {
+                if (stopped || navigation) {
+                    return;
+                }
+                checkFocus('window_blur', false);
+                if (queue.length || !initialised) {
+                    drain();
+                } else if (document.visibilityState === 'visible' && !draining) {
+                    request(payload({action: 'heartbeat'})).then(function() {
+                        status();
+                    }).catch(function() {
+                        status(config.strings.pending);
+                    });
                 }
             }, config.heartbeatMs);
-            window.addEventListener('unload', function() {
-                if (heartbeattimer) {
-                    window.clearInterval(heartbeattimer);
-                }
-            });
         }
 
-        return {start: start};
+        return {start: start, drain: drain};
     }
 
     return {
         /**
-         * Entry point called by Moodle.
+         * Initialise a monitor once per attempt page.
          *
-         * @param {Object} config Server-supplied configuration.
+         * @param {Object} config Server configuration.
          */
         init: function(config) {
-            if (!config || !config.attemptId || !window.crypto) {
+            if (!config || !config.attemptId || !config.userId || !window.crypto ||
+                    !window.performance || document.querySelector('.cdexamcontrol-monitor-badge')) {
                 return;
             }
             createMonitor(config).start();

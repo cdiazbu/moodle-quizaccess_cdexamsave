@@ -14,15 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace quizaccess_cdexamsave;
+namespace quizaccess_cdexamcontrol;
 
 /**
  * Tests for per-quiz rule configuration.
  *
- * @package    quizaccess_cdexamsave
+ * @package    quizaccess_cdexamcontrol
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @coversDefaultClass \quizaccess_cdexamsave
+ * @coversDefaultClass \quizaccess_cdexamcontrol
  */
 final class rule_test extends \advanced_testcase {
     /**
@@ -33,7 +33,7 @@ final class rule_test extends \advanced_testcase {
     protected function setUp(): void {
         parent::setUp();
         global $CFG;
-        require_once($CFG->dirroot . '/mod/quiz/accessrule/cdexamsave/rule.php');
+        require_once($CFG->dirroot . '/mod/quiz/accessrule/cdexamcontrol/rule.php');
     }
 
     /**
@@ -52,27 +52,35 @@ final class rule_test extends \advanced_testcase {
 
         $formdata = (object) [
             'id' => $quiz->id,
-            'cdexamsaveenabled' => 1,
-            'cdexamsavewarnstudent' => 1,
-            'cdexamsavegraceperiodms' => 1000,
+            'cdexamcontrolenabled' => 1,
+            'cdexamcontrolwarnstudent' => 1,
+            'cdexamcontrolgraceperiodms' => 1000,
+            'cdexamcontrolrequirefullscreen' => 1,
+            'cdexamcontrolblockshortcuts' => 0,
         ];
-        \quizaccess_cdexamsave::save_settings($formdata);
-        $record = $DB->get_record('quizaccess_cdexamsave', ['quizid' => $quiz->id], '*', MUST_EXIST);
+        \quizaccess_cdexamcontrol::save_settings($formdata);
+        $record = $DB->get_record('quizaccess_cdexamcontrol', ['quizid' => $quiz->id], '*', MUST_EXIST);
         $this->assertSame(1, (int) $record->enabled);
         $this->assertSame(1, (int) $record->warnstudent);
         $this->assertSame(1000, (int) $record->graceperiodms);
+        $this->assertSame(1, (int) $record->requirefullscreen);
+        $this->assertSame(0, (int) $record->blockshortcuts);
 
-        $formdata->cdexamsavewarnstudent = 0;
-        $formdata->cdexamsavegraceperiodms = 2000;
-        \quizaccess_cdexamsave::save_settings($formdata);
-        $this->assertSame(1, $DB->count_records('quizaccess_cdexamsave', ['quizid' => $quiz->id]));
-        $record = $DB->get_record('quizaccess_cdexamsave', ['quizid' => $quiz->id], '*', MUST_EXIST);
+        $formdata->cdexamcontrolwarnstudent = 0;
+        $formdata->cdexamcontrolrequirefullscreen = 0;
+        $formdata->cdexamcontrolblockshortcuts = 1;
+        $formdata->cdexamcontrolgraceperiodms = 2000;
+        \quizaccess_cdexamcontrol::save_settings($formdata);
+        $this->assertSame(1, $DB->count_records('quizaccess_cdexamcontrol', ['quizid' => $quiz->id]));
+        $record = $DB->get_record('quizaccess_cdexamcontrol', ['quizid' => $quiz->id], '*', MUST_EXIST);
         $this->assertSame(0, (int) $record->warnstudent);
         $this->assertSame(2000, (int) $record->graceperiodms);
+        $this->assertSame(0, (int) $record->requirefullscreen);
+        $this->assertSame(1, (int) $record->blockshortcuts);
 
-        $formdata->cdexamsaveenabled = 0;
-        \quizaccess_cdexamsave::save_settings($formdata);
-        $this->assertFalse($DB->record_exists('quizaccess_cdexamsave', ['quizid' => $quiz->id]));
+        $formdata->cdexamcontrolenabled = 0;
+        \quizaccess_cdexamcontrol::save_settings($formdata);
+        $this->assertFalse($DB->record_exists('quizaccess_cdexamcontrol', ['quizid' => $quiz->id]));
     }
 
     /**
@@ -82,9 +90,9 @@ final class rule_test extends \advanced_testcase {
      * @return void
      */
     public function test_settings_sql_is_namespaced(): void {
-        [$fields, $joins, $params] = \quizaccess_cdexamsave::get_settings_sql(42);
-        $this->assertStringContainsString('cdexamsaveenabled', $fields);
-        $this->assertStringContainsString('{quizaccess_cdexamsave}', $joins);
+        [$fields, $joins, $params] = \quizaccess_cdexamcontrol::get_settings_sql(42);
+        $this->assertStringContainsString('cdexamcontrolenabled', $fields);
+        $this->assertStringContainsString('{quizaccess_cdexamcontrol}', $joins);
         $this->assertSame([], $params);
     }
 }

@@ -15,17 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Quiz access rule implementation for CD ExamFocus.
+ * Quiz access rule implementation for CD Exam Control.
  *
- * @package    quizaccess_cdexamsave
+ * @package    quizaccess_cdexamcontrol
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
- * CD ExamFocus access rule for Moodle quizzes.
+ * CD Exam Control access rule for Moodle quizzes.
  */
-class quizaccess_cdexamsave extends \mod_quiz\local\access_rule_base {
+class quizaccess_cdexamcontrol extends \mod_quiz\local\access_rule_base {
     /**
      * Create the rule only when monitoring is enabled for this quiz.
      *
@@ -36,56 +36,64 @@ class quizaccess_cdexamsave extends \mod_quiz\local\access_rule_base {
      */
     public static function make($quizobj, $timenow, $canignoretimelimits) {
         $quiz = $quizobj->get_quiz();
-        if (empty($quiz->cdexamsaveenabled)) {
+        if (empty($quiz->cdexamcontrolenabled)) {
             return null;
         }
         return new self($quizobj, $timenow);
     }
 
     /**
-     * Add CD ExamFocus controls to the quiz settings form.
+     * Add CD Exam Control controls to the quiz settings form.
      *
      * @param mod_quiz_mod_form $quizform Quiz form.
      * @param MoodleQuickForm $mform Moodle form.
      * @return void
      */
     public static function add_settings_form_fields($quizform, $mform) {
-        $mform->addElement('header', 'cdexamsaveheader', get_string('formheader', 'quizaccess_cdexamsave'));
-        $mform->setExpanded('cdexamsaveheader', false);
+        $mform->addElement('header', 'cdexamcontrolheader', get_string('formheader', 'quizaccess_cdexamcontrol'));
+        $mform->setExpanded('cdexamcontrolheader', false);
 
         $mform->addElement(
             'selectyesno',
-            'cdexamsaveenabled',
-            get_string('enabled', 'quizaccess_cdexamsave')
+            'cdexamcontrolenabled',
+            get_string('enabled', 'quizaccess_cdexamcontrol')
         );
-        $mform->addHelpButton('cdexamsaveenabled', 'enabled', 'quizaccess_cdexamsave');
-        $mform->setDefault('cdexamsaveenabled', 0);
+        $mform->addHelpButton('cdexamcontrolenabled', 'enabled', 'quizaccess_cdexamcontrol');
+        $mform->setDefault('cdexamcontrolenabled', 0);
 
         $mform->addElement(
             'selectyesno',
-            'cdexamsavewarnstudent',
-            get_string('warnstudent', 'quizaccess_cdexamsave')
+            'cdexamcontrolwarnstudent',
+            get_string('warnstudent', 'quizaccess_cdexamcontrol')
         );
-        $mform->addHelpButton('cdexamsavewarnstudent', 'warnstudent', 'quizaccess_cdexamsave');
-        $mform->setDefault('cdexamsavewarnstudent', 1);
-        $mform->disabledIf('cdexamsavewarnstudent', 'cdexamsaveenabled', 'eq', 0);
+        $mform->addHelpButton('cdexamcontrolwarnstudent', 'warnstudent', 'quizaccess_cdexamcontrol');
+        $mform->setDefault('cdexamcontrolwarnstudent', 1);
+        $mform->disabledIf('cdexamcontrolwarnstudent', 'cdexamcontrolenabled', 'eq', 0);
+
+        foreach (['requirefullscreen' => 1, 'blockshortcuts' => 0] as $setting => $default) {
+            $name = 'cdexamcontrol' . $setting;
+            $mform->addElement('selectyesno', $name, get_string($setting, 'quizaccess_cdexamcontrol'));
+            $mform->addHelpButton($name, $setting, 'quizaccess_cdexamcontrol');
+            $mform->setDefault($name, $default);
+            $mform->disabledIf($name, 'cdexamcontrolenabled', 'eq', 0);
+        }
 
         $graceoptions = [
-            0 => get_string('grace_none', 'quizaccess_cdexamsave'),
-            500 => get_string('grace_halfsecond', 'quizaccess_cdexamsave'),
-            1000 => get_string('grace_onesecond', 'quizaccess_cdexamsave'),
-            2000 => get_string('grace_twoseconds', 'quizaccess_cdexamsave'),
-            3000 => get_string('grace_threeseconds', 'quizaccess_cdexamsave'),
+            0 => get_string('grace_none', 'quizaccess_cdexamcontrol'),
+            500 => get_string('grace_halfsecond', 'quizaccess_cdexamcontrol'),
+            1000 => get_string('grace_onesecond', 'quizaccess_cdexamcontrol'),
+            2000 => get_string('grace_twoseconds', 'quizaccess_cdexamcontrol'),
+            3000 => get_string('grace_threeseconds', 'quizaccess_cdexamcontrol'),
         ];
         $mform->addElement(
             'select',
-            'cdexamsavegraceperiodms',
-            get_string('graceperiod', 'quizaccess_cdexamsave'),
+            'cdexamcontrolgraceperiodms',
+            get_string('graceperiod', 'quizaccess_cdexamcontrol'),
             $graceoptions
         );
-        $mform->addHelpButton('cdexamsavegraceperiodms', 'graceperiod', 'quizaccess_cdexamsave');
-        $mform->setDefault('cdexamsavegraceperiodms', 1000);
-        $mform->disabledIf('cdexamsavegraceperiodms', 'cdexamsaveenabled', 'eq', 0);
+        $mform->addHelpButton('cdexamcontrolgraceperiodms', 'graceperiod', 'quizaccess_cdexamcontrol');
+        $mform->setDefault('cdexamcontrolgraceperiodms', 1000);
+        $mform->disabledIf('cdexamcontrolgraceperiodms', 'cdexamcontrolenabled', 'eq', 0);
     }
 
     /**
@@ -100,10 +108,10 @@ class quizaccess_cdexamsave extends \mod_quiz\local\access_rule_base {
     public static function validate_settings_form_fields($errors, $data, $files, $quizform) {
         $allowed = [0, 500, 1000, 2000, 3000];
         if (
-            !empty($data['cdexamsaveenabled']) &&
-            !in_array((int) ($data['cdexamsavegraceperiodms'] ?? -1), $allowed, true)
+            !empty($data['cdexamcontrolenabled']) &&
+            !in_array((int) ($data['cdexamcontrolgraceperiodms'] ?? -1), $allowed, true)
         ) {
-            $errors['cdexamsavegraceperiodms'] = get_string('invalidgraceperiod', 'quizaccess_cdexamsave');
+            $errors['cdexamcontrolgraceperiodms'] = get_string('invalidgraceperiod', 'quizaccess_cdexamcontrol');
         }
         return $errors;
     }
@@ -117,13 +125,13 @@ class quizaccess_cdexamsave extends \mod_quiz\local\access_rule_base {
     public static function save_settings($quiz) {
         global $DB;
 
-        if (empty($quiz->cdexamsaveenabled)) {
-            $DB->delete_records('quizaccess_cdexamsave', ['quizid' => $quiz->id]);
+        if (empty($quiz->cdexamcontrolenabled)) {
+            $DB->delete_records('quizaccess_cdexamcontrol', ['quizid' => $quiz->id]);
             return;
         }
 
         $now = time();
-        $record = $DB->get_record('quizaccess_cdexamsave', ['quizid' => $quiz->id]);
+        $record = $DB->get_record('quizaccess_cdexamcontrol', ['quizid' => $quiz->id]);
         if (!$record) {
             $record = (object) [
                 'quizid' => $quiz->id,
@@ -131,14 +139,16 @@ class quizaccess_cdexamsave extends \mod_quiz\local\access_rule_base {
             ];
         }
         $record->enabled = 1;
-        $record->warnstudent = empty($quiz->cdexamsavewarnstudent) ? 0 : 1;
-        $record->graceperiodms = (int) ($quiz->cdexamsavegraceperiodms ?? 1000);
+        $record->warnstudent = empty($quiz->cdexamcontrolwarnstudent) ? 0 : 1;
+        $record->requirefullscreen = (int) ($quiz->cdexamcontrolrequirefullscreen ?? 1) ? 1 : 0;
+        $record->blockshortcuts = empty($quiz->cdexamcontrolblockshortcuts) ? 0 : 1;
+        $record->graceperiodms = (int) ($quiz->cdexamcontrolgraceperiodms ?? 1000);
         $record->timemodified = $now;
 
         if (empty($record->id)) {
-            $DB->insert_record('quizaccess_cdexamsave', $record);
+            $DB->insert_record('quizaccess_cdexamcontrol', $record);
         } else {
-            $DB->update_record('quizaccess_cdexamsave', $record);
+            $DB->update_record('quizaccess_cdexamcontrol', $record);
         }
     }
 
@@ -151,9 +161,9 @@ class quizaccess_cdexamsave extends \mod_quiz\local\access_rule_base {
      */
     public static function delete_settings($quiz) {
         global $DB;
-        $DB->delete_records('quizaccess_cdexamsave', ['quizid' => $quiz->id]);
-        $DB->delete_records('quizaccess_cdexamsave_evt', ['quizid' => $quiz->id]);
-        $DB->delete_records('quizaccess_cdexamsave_sess', ['quizid' => $quiz->id]);
+        $DB->delete_records('quizaccess_cdexamcontrol', ['quizid' => $quiz->id]);
+        $DB->delete_records('quizaccess_cdexamcontrol_evt', ['quizid' => $quiz->id]);
+        $DB->delete_records('quizaccess_cdexamctrl_sess', ['quizid' => $quiz->id]);
     }
 
     /**
@@ -164,10 +174,12 @@ class quizaccess_cdexamsave extends \mod_quiz\local\access_rule_base {
      */
     public static function get_settings_sql($quizid) {
         return [
-            'cds.enabled AS cdexamsaveenabled, ' .
-                'cds.warnstudent AS cdexamsavewarnstudent, ' .
-                'cds.graceperiodms AS cdexamsavegraceperiodms',
-            'LEFT JOIN {quizaccess_cdexamsave} cds ON cds.quizid = quiz.id',
+            'cds.enabled AS cdexamcontrolenabled, ' .
+                'cds.warnstudent AS cdexamcontrolwarnstudent, ' .
+                'cds.graceperiodms AS cdexamcontrolgraceperiodms, ' .
+                'cds.requirefullscreen AS cdexamcontrolrequirefullscreen, ' .
+                'cds.blockshortcuts AS cdexamcontrolblockshortcuts',
+            'LEFT JOIN {quizaccess_cdexamcontrol} cds ON cds.quizid = quiz.id',
             [],
         ];
     }
@@ -198,22 +210,40 @@ class quizaccess_cdexamsave extends \mod_quiz\local\access_rule_base {
         }
 
         $cm = get_coursemodule_from_instance('quiz', $this->quiz->id, $this->quiz->course, false, MUST_EXIST);
-        $heartbeat = max(5, min(60, (int) get_config('quizaccess_cdexamsave', 'heartbeatinterval')));
+        $context = context_module::instance($cm->id);
+        if (has_capability('quizaccess/cdexamcontrol:exempt', $context)) {
+            return;
+        }
+        $heartbeat = (int) get_config('quizaccess_cdexamcontrol', 'heartbeatinterval');
+        $heartbeat = max(5, min(60, $heartbeat ?: 10));
         $config = [
             'attemptId' => (int) $attemptid,
+            'userId' => (int) $USER->id,
+            'requireFullscreen' => !empty($this->quiz->cdexamcontrolrequirefullscreen),
+            'blockShortcuts' => !empty($this->quiz->cdexamcontrolblockshortcuts),
             'cmId' => (int) $cm->id,
-            'gracePeriodMs' => (int) $this->quiz->cdexamsavegraceperiodms,
+            'gracePeriodMs' => (int) $this->quiz->cdexamcontrolgraceperiodms,
             'heartbeatMs' => $heartbeat * 1000,
-            'warnStudent' => !empty($this->quiz->cdexamsavewarnstudent),
+            'warnStudent' => !empty($this->quiz->cdexamcontrolwarnstudent),
             'strings' => [
-                'badge' => get_string('monitoringbadge', 'quizaccess_cdexamsave'),
-                'warningTitle' => get_string('studentwarningtitle', 'quizaccess_cdexamsave'),
-                'warningText' => get_string('studentwarningtext', 'quizaccess_cdexamsave'),
-                'continue' => get_string('continueattempt', 'quizaccess_cdexamsave'),
-                'duration' => get_string('studentwarningduration', 'quizaccess_cdexamsave'),
+                'badge' => get_string('monitoringbadge', 'quizaccess_cdexamcontrol'),
+                'connecting' => get_string('monitorconnecting', 'quizaccess_cdexamcontrol'),
+                'pending' => get_string('monitorpending', 'quizaccess_cdexamcontrol'),
+                'stopped' => get_string('monitorstopped', 'quizaccess_cdexamcontrol'),
+                'queueFull' => get_string('monitorqueuefull', 'quizaccess_cdexamcontrol'),
+                'fullscreenTitle' => get_string('fullscreentitle', 'quizaccess_cdexamcontrol'),
+                'fullscreenText' => get_string('fullscreentext', 'quizaccess_cdexamcontrol'),
+                'fullscreenButton' => get_string('fullscreenbutton', 'quizaccess_cdexamcontrol'),
+                'fullscreenError' => get_string('fullscreenerror', 'quizaccess_cdexamcontrol'),
+                'fullscreenUnsupported' => get_string('fullscreenunsupported', 'quizaccess_cdexamcontrol'),
+                'shortcut' => get_string('shortcutnotice', 'quizaccess_cdexamcontrol'),
+                'warningTitle' => get_string('studentwarningtitle', 'quizaccess_cdexamcontrol'),
+                'warningText' => get_string('studentwarningtext', 'quizaccess_cdexamcontrol'),
+                'continue' => get_string('continueattempt', 'quizaccess_cdexamcontrol'),
+                'duration' => get_string('studentwarningduration', 'quizaccess_cdexamcontrol'),
             ],
         ];
-        $page->requires->js_call_amd('quizaccess_cdexamsave/monitor', 'init', [$config]);
+        $page->requires->js_call_amd('quizaccess_cdexamcontrol/monitor', 'init', [$config]);
     }
 
     /**
@@ -222,14 +252,14 @@ class quizaccess_cdexamsave extends \mod_quiz\local\access_rule_base {
      * @return array
      */
     public function description() {
-        $messages = [get_string('monitoringnotice', 'quizaccess_cdexamsave')];
+        $messages = [get_string('monitoringnotice', 'quizaccess_cdexamcontrol')];
         $cm = get_coursemodule_from_instance('quiz', $this->quiz->id, $this->quiz->course, false, MUST_EXIST);
         $context = context_module::instance($cm->id);
-        if (has_capability('quizaccess/cdexamsave:viewreport', $context)) {
-            $url = new moodle_url('/mod/quiz/accessrule/cdexamsave/report.php', ['cmid' => $cm->id]);
+        if (has_capability('quizaccess/cdexamcontrol:viewreport', $context)) {
+            $url = new moodle_url('/mod/quiz/accessrule/cdexamcontrol/report.php', ['cmid' => $cm->id]);
             $messages[] = html_writer::link(
                 $url,
-                get_string('openlivereport', 'quizaccess_cdexamsave'),
+                get_string('openlivereport', 'quizaccess_cdexamcontrol'),
                 ['class' => 'btn btn-secondary btn-sm']
             );
         }

@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Site-wide settings for CD ExamFocus.
+ * Site-wide settings for CD Exam Control.
  *
- * @package    quizaccess_cdexamsave
+ * @package    quizaccess_cdexamcontrol
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,69 +26,69 @@ defined('MOODLE_INTERNAL') || die();
 
 if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_heading(
-        'quizaccess_cdexamsave/general',
-        get_string('settingsheading', 'quizaccess_cdexamsave'),
-        get_string('settingsheading_desc', 'quizaccess_cdexamsave')
+        'quizaccess_cdexamcontrol/general',
+        get_string('settingsheading', 'quizaccess_cdexamcontrol'),
+        get_string('settingsheading_desc', 'quizaccess_cdexamcontrol')
     ));
 
     $settings->add(new admin_setting_configtext(
-        'quizaccess_cdexamsave/retentiondays',
-        get_string('retentiondays', 'quizaccess_cdexamsave'),
-        get_string('retentiondays_desc', 'quizaccess_cdexamsave'),
+        'quizaccess_cdexamcontrol/retentiondays',
+        get_string('retentiondays', 'quizaccess_cdexamcontrol'),
+        get_string('retentiondays_desc', 'quizaccess_cdexamcontrol'),
         180,
         PARAM_INT
     ));
 
     $settings->add(new admin_setting_configtext(
-        'quizaccess_cdexamsave/reportrefresh',
-        get_string('reportrefresh', 'quizaccess_cdexamsave'),
-        get_string('reportrefresh_desc', 'quizaccess_cdexamsave'),
+        'quizaccess_cdexamcontrol/reportrefresh',
+        get_string('reportrefresh', 'quizaccess_cdexamcontrol'),
+        get_string('reportrefresh_desc', 'quizaccess_cdexamcontrol'),
         3,
         PARAM_INT
     ));
 
     $settings->add(new admin_setting_configtext(
-        'quizaccess_cdexamsave/heartbeatinterval',
-        get_string('heartbeatinterval', 'quizaccess_cdexamsave'),
-        get_string('heartbeatinterval_desc', 'quizaccess_cdexamsave'),
+        'quizaccess_cdexamcontrol/heartbeatinterval',
+        get_string('heartbeatinterval', 'quizaccess_cdexamcontrol'),
+        get_string('heartbeatinterval_desc', 'quizaccess_cdexamcontrol'),
         10,
         PARAM_INT
     ));
 
     $settings->add(new admin_setting_configtext(
-        'quizaccess_cdexamsave/staleseconds',
-        get_string('staleseconds', 'quizaccess_cdexamsave'),
-        get_string('staleseconds_desc', 'quizaccess_cdexamsave'),
+        'quizaccess_cdexamcontrol/staleseconds',
+        get_string('staleseconds', 'quizaccess_cdexamcontrol'),
+        get_string('staleseconds_desc', 'quizaccess_cdexamcontrol'),
         35,
         PARAM_INT
     ));
 
     $settings->add(new admin_setting_configtext(
-        'quizaccess_cdexamsave/maxincidents',
-        get_string('maxincidents', 'quizaccess_cdexamsave'),
-        get_string('maxincidents_desc', 'quizaccess_cdexamsave'),
+        'quizaccess_cdexamcontrol/maxincidents',
+        get_string('maxincidents', 'quizaccess_cdexamcontrol'),
+        get_string('maxincidents_desc', 'quizaccess_cdexamcontrol'),
         2000,
         PARAM_INT
     ));
 
     $settings->add(new admin_setting_heading(
-        'quizaccess_cdexamsave/reviewpriority',
-        get_string('reviewprioritysettings', 'quizaccess_cdexamsave'),
-        get_string('reviewprioritysettings_desc', 'quizaccess_cdexamsave')
+        'quizaccess_cdexamcontrol/reviewpriority',
+        get_string('reviewprioritysettings', 'quizaccess_cdexamcontrol'),
+        get_string('reviewprioritysettings_desc', 'quizaccess_cdexamcontrol')
     ));
 
     $settings->add(new admin_setting_configtext(
-        'quizaccess_cdexamsave/reviewincidentcount',
-        get_string('reviewincidentcount', 'quizaccess_cdexamsave'),
-        get_string('reviewincidentcount_desc', 'quizaccess_cdexamsave'),
+        'quizaccess_cdexamcontrol/reviewincidentcount',
+        get_string('reviewincidentcount', 'quizaccess_cdexamcontrol'),
+        get_string('reviewincidentcount_desc', 'quizaccess_cdexamcontrol'),
         3,
         PARAM_INT
     ));
 
     $settings->add(new admin_setting_configtext(
-        'quizaccess_cdexamsave/reviewduration',
-        get_string('reviewduration', 'quizaccess_cdexamsave'),
-        get_string('reviewduration_desc', 'quizaccess_cdexamsave'),
+        'quizaccess_cdexamcontrol/reviewduration',
+        get_string('reviewduration', 'quizaccess_cdexamcontrol'),
+        get_string('reviewduration_desc', 'quizaccess_cdexamcontrol'),
         60,
         PARAM_INT
     ));

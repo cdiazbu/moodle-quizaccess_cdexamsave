@@ -14,17 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace quizaccess_cdexamsave;
+namespace quizaccess_cdexamcontrol;
 
-use quizaccess_cdexamsave\local\report_service;
+use quizaccess_cdexamcontrol\local\report_service;
 
 /**
  * Tests for report prioritisation logic.
  *
- * @package    quizaccess_cdexamsave
+ * @package    quizaccess_cdexamcontrol
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @coversDefaultClass \quizaccess_cdexamsave\local\report_service
+ * @coversDefaultClass \quizaccess_cdexamcontrol\local\report_service
  */
 final class report_service_test extends \advanced_testcase {
     /**
@@ -51,8 +51,8 @@ final class report_service_test extends \advanced_testcase {
      */
     public function test_review_thresholds_are_bounded(): void {
         $this->resetAfterTest(true);
-        set_config('reviewincidentcount', 999, 'quizaccess_cdexamsave');
-        set_config('reviewduration', 999999, 'quizaccess_cdexamsave');
+        set_config('reviewincidentcount', 999, 'quizaccess_cdexamcontrol');
+        set_config('reviewduration', 999999, 'quizaccess_cdexamcontrol');
 
         $this->assertSame([
             'incidentcount' => 100,

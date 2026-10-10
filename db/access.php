@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Capabilities for CD ExamFocus.
+ * Capabilities for CD Exam Control.
  *
- * @package    quizaccess_cdexamsave
+ * @package    quizaccess_cdexamcontrol
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -25,7 +25,12 @@
 defined('MOODLE_INTERNAL') || die();
 
 $capabilities = [
-    'quizaccess/cdexamsave:viewreport' => [
+    'quizaccess/cdexamcontrol:exempt' => [
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => [],
+    ],
+    'quizaccess/cdexamcontrol:viewreport' => [
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => [
@@ -35,7 +40,7 @@ $capabilities = [
         ],
         'clonepermissionsfrom' => 'mod/quiz:viewreports',
     ],
-    'quizaccess/cdexamsave:exportreport' => [
+    'quizaccess/cdexamcontrol:exportreport' => [
         'riskbitmask' => RISK_PERSONAL,
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace quizaccess_cdexamsave\local;
+namespace quizaccess_cdexamcontrol\local;
 
 /**
  * Validates and records browser monitoring signals.
@@ -22,7 +22,7 @@ namespace quizaccess_cdexamsave\local;
  * All write operations are idempotent. Browser events can be retried after a
  * transient network failure without creating duplicate incidents.
  *
- * @package    quizaccess_cdexamsave
+ * @package    quizaccess_cdexamcontrol
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -33,11 +33,13 @@ class incident_service {
         'window_blur',
         'pagehide',
         'freeze',
+        'fullscreen_exit',
+        'shortcut_blocked',
         'unknown',
     ];
 
     /** @var array Permitted collector actions. */
-    private const ACTIONS = ['init', 'heartbeat', 'lost', 'returned'];
+    private const ACTIONS = ['init', 'heartbeat', 'lost', 'returned', 'observed'];
 
     /**
      * Record one browser signal.
@@ -57,10 +59,10 @@ class incident_service {
         $duration = max(0, min(WEEKSECS, (int) ($payload['duration'] ?? 0)));
 
         if (!$attemptid || !in_array($action, self::ACTIONS, true) || !self::is_valid_uuid($pagesessionid)) {
-            throw new \moodle_exception('invalidrequest', 'quizaccess_cdexamsave');
+            throw new \moodle_exception('invalidrequest', 'quizaccess_cdexamcontrol');
         }
-        if (in_array($action, ['lost', 'returned'], true) && !self::is_valid_uuid($eventuuid)) {
-            throw new \moodle_exception('invalidrequest', 'quizaccess_cdexamsave');
+        if (in_array($action, ['lost', 'returned', 'observed'], true) && !self::is_valid_uuid($eventuuid)) {
+            throw new \moodle_exception('invalidrequest', 'quizaccess_cdexamcontrol');
         }
 
         $attempt = $DB->get_record('quiz_attempts', ['id' => $attemptid], '*', MUST_EXIST);
@@ -74,68 +76,105 @@ class incident_service {
             !empty($attempt->preview) ||
             $attempt->state !== 'inprogress'
         ) {
-            throw new \moodle_exception('attemptnotmonitorable', 'quizaccess_cdexamsave');
+            throw new \moodle_exception('attemptnotmonitorable', 'quizaccess_cdexamcontrol');
+        }
+        $context = \context_module::instance($cm->id);
+        if (has_capability('quizaccess/cdexamcontrol:exempt', $context)) {
+            throw new \moodle_exception('attemptnotmonitorable', 'quizaccess_cdexamcontrol');
         }
         $duration = min($duration, max(0, time() - (int) $attempt->timestart));
-        if (!$DB->record_exists('quizaccess_cdexamsave', ['quizid' => $quiz->id, 'enabled' => 1])) {
-            throw new \moodle_exception('monitoringdisabled', 'quizaccess_cdexamsave');
+        if (!$DB->record_exists('quizaccess_cdexamcontrol', ['quizid' => $quiz->id, 'enabled' => 1])) {
+            throw new \moodle_exception('monitoringdisabled', 'quizaccess_cdexamcontrol');
         }
 
-        $now = time();
-        $transaction = $DB->start_delegated_transaction();
-        $session = self::ensure_session($attempt, $pagesessionid, $now);
-        $updatesession = $action === 'init' || $session->pagesessionid === $pagesessionid;
-
-        if ($action === 'init') {
-            if ($session->pagesessionid !== $pagesessionid) {
-                self::close_open_incidents($attempt->id, $now);
-                $session->focuslost = 0;
-                $session->lostsince = 0;
-            }
-            $session->pagesessionid = $pagesessionid;
-        } else if ($action === 'lost') {
-            $event = self::record_loss(
-                $attempt,
-                $pagesessionid,
-                $eventuuid,
-                $reason,
-                $clienttime,
-                $now
-            );
-            // A delayed beacon from an unloaded page must not overwrite the
-            // focus state of a newer page session for the same attempt.
-            if ($session->pagesessionid === $pagesessionid) {
-                $session->focuslost = 1;
-                $session->lostsince = (int) $event->timestart;
-            }
-        } else if ($action === 'returned') {
-            self::record_return(
-                $attempt,
-                $pagesessionid,
-                $eventuuid,
-                $reason,
-                $clienttime,
-                $duration,
-                $now
-            );
-            if ($session->pagesessionid === $pagesessionid) {
-                $session->focuslost = 0;
-                $session->lostsince = 0;
-            }
+        $factory = \core\lock\lock_config::get_lock_factory('quizaccess_cdexamcontrol');
+        $lock = $factory->get_lock('attempt:' . $attemptid, 5);
+        if (!$lock) {
+            throw new \moodle_exception('collectorbusy', 'quizaccess_cdexamcontrol');
         }
+        try {
+            $transaction = $DB->start_delegated_transaction();
+            try {
+                // Recheck after waiting for a concurrent collector request.
+                $attempt = $DB->get_record('quiz_attempts', ['id' => $attemptid], '*', MUST_EXIST);
+                if ($attempt->state !== 'inprogress') {
+                    throw new \moodle_exception('attemptnotmonitorable', 'quizaccess_cdexamcontrol');
+                }
+                $now = time();
+                $session = self::ensure_session($attempt, $pagesessionid, $now);
+                $updatesession = $action === 'init' || $session->pagesessionid === $pagesessionid;
 
-        if ($updatesession) {
-            $session->active = 1;
-            $session->lastheartbeat = $now;
-            $session->timemodified = $now;
-            $DB->update_record('quizaccess_cdexamsave_sess', $session);
+                if ($action === 'init') {
+                    if ($session->pagesessionid !== $pagesessionid) {
+                        self::close_open_incidents($attempt->id, $now);
+                        $session->focuslost = 0;
+                        $session->lostsince = 0;
+                    }
+                    $session->pagesessionid = $pagesessionid;
+                } else if ($action === 'lost') {
+                    $event = self::record_loss(
+                        $attempt,
+                        $pagesessionid,
+                        $eventuuid,
+                        $reason,
+                        $clienttime,
+                        $now
+                    );
+                    if (!$updatesession) {
+                        // The old page is already superseded. Never leave its delayed
+                        // loss open indefinitely while a newer page is answering.
+                        self::record_return($attempt, $pagesessionid, $eventuuid, $reason, $clienttime, 0, $now);
+                    }
+                    // A delayed beacon from an unloaded page must not overwrite the
+                    // focus state of a newer page session for the same attempt.
+                    if ($session->pagesessionid === $pagesessionid && empty($event->timeend)) {
+                        $session->focuslost = 1;
+                        $session->lostsince = (int) $event->timestart;
+                    }
+                } else if ($action === 'observed') {
+                    self::record_return($attempt, $pagesessionid, $eventuuid, $reason, $clienttime, 0, $now);
+                } else if ($action === 'returned') {
+                    self::record_return(
+                        $attempt,
+                        $pagesessionid,
+                        $eventuuid,
+                        $reason,
+                        $clienttime,
+                        $duration,
+                        $now
+                    );
+                    if ($session->pagesessionid === $pagesessionid) {
+                        $session->focuslost = 0;
+                        $session->lostsince = 0;
+                    }
+                }
+
+                if ($updatesession) {
+                    // Derive state from open events, never from delivery order alone.
+                    $open = $DB->get_records('quizaccess_cdexamcontrol_evt', [
+                        'attemptid' => $attemptid,
+                        'pagesessionid' => $pagesessionid,
+                        'timeend' => 0,
+                    ], 'timestart ASC', 'id,timestart', 0, 1);
+                    $first = $open ? reset($open) : null;
+                    $session->focuslost = $first ? 1 : 0;
+                    $session->lostsince = $first ? (int) $first->timestart : 0;
+                    $session->active = 1;
+                    $session->lastheartbeat = $now;
+                    $session->timemodified = $now;
+                    $DB->update_record('quizaccess_cdexamctrl_sess', $session);
+                }
+                $transaction->allow_commit();
+            } catch (\Throwable $error) {
+                $transaction->rollback($error);
+            }
+            return [
+                'accepted' => true,
+                'servertime' => $now,
+            ];
+        } finally {
+            $lock->release();
         }
-        $transaction->allow_commit();
-
-        return [
-            'accepted' => true,
-            'servertime' => $now,
-        ];
     }
 
     /**
@@ -149,7 +188,7 @@ class incident_service {
     private static function ensure_session(\stdClass $attempt, string $pagesessionid, int $now): \stdClass {
         global $DB;
 
-        $session = $DB->get_record('quizaccess_cdexamsave_sess', ['attemptid' => $attempt->id]);
+        $session = $DB->get_record('quizaccess_cdexamctrl_sess', ['attemptid' => $attempt->id]);
         if ($session) {
             return $session;
         }
@@ -167,7 +206,7 @@ class incident_service {
             'timemodified' => $now,
         ];
 
-        $record->id = $DB->insert_record('quizaccess_cdexamsave_sess', $record);
+        $record->id = $DB->insert_record('quizaccess_cdexamctrl_sess', $record);
         return $record;
     }
 
@@ -192,16 +231,16 @@ class incident_service {
     ): \stdClass {
         global $DB;
 
-        $existing = $DB->get_record('quizaccess_cdexamsave_evt', ['eventuuid' => $eventuuid]);
+        $existing = $DB->get_record('quizaccess_cdexamcontrol_evt', ['eventuuid' => $eventuuid]);
         if ($existing) {
-            self::assert_event_ownership($existing, $attempt);
+            self::assert_event_ownership($existing, $attempt, $pagesessionid);
             return $existing;
         }
 
-        $maxincidents = (int) get_config('quizaccess_cdexamsave', 'maxincidents');
+        $maxincidents = (int) get_config('quizaccess_cdexamcontrol', 'maxincidents');
         $maxincidents = max(100, min(10000, $maxincidents ?: 2000));
-        if ($DB->count_records('quizaccess_cdexamsave_evt', ['attemptid' => $attempt->id]) >= $maxincidents) {
-            throw new \moodle_exception('incidentlimitreached', 'quizaccess_cdexamsave');
+        if ($DB->count_records('quizaccess_cdexamcontrol_evt', ['attemptid' => $attempt->id]) >= $maxincidents) {
+            throw new \moodle_exception('incidentlimitreached', 'quizaccess_cdexamcontrol');
         }
 
         $event = (object) [
@@ -220,7 +259,7 @@ class incident_service {
             'timemodified' => $now,
         ];
 
-        $event->id = $DB->insert_record('quizaccess_cdexamsave_evt', $event);
+        $event->id = $DB->insert_record('quizaccess_cdexamcontrol_evt', $event);
         return $event;
     }
 
@@ -248,7 +287,7 @@ class incident_service {
     ): void {
         global $DB;
 
-        $event = $DB->get_record('quizaccess_cdexamsave_evt', ['eventuuid' => $eventuuid]);
+        $event = $DB->get_record('quizaccess_cdexamcontrol_evt', ['eventuuid' => $eventuuid]);
         if (!$event) {
             $event = self::record_loss(
                 $attempt,
@@ -259,7 +298,7 @@ class incident_service {
                 max((int) $attempt->timestart, $now - $duration)
             );
         }
-        self::assert_event_ownership($event, $attempt);
+        self::assert_event_ownership($event, $attempt, $pagesessionid);
 
         if (!empty($event->timeend)) {
             return;
@@ -272,7 +311,7 @@ class incident_service {
         $event->duration = $serverduration;
         $event->clientend = $clienttime;
         $event->timemodified = $now;
-        $DB->update_record('quizaccess_cdexamsave_evt', $event);
+        $DB->update_record('quizaccess_cdexamcontrol_evt', $event);
     }
 
     /**
@@ -285,7 +324,7 @@ class incident_service {
     public static function close_open_incidents(int $attemptid, int $now): void {
         global $DB;
 
-        $events = $DB->get_records('quizaccess_cdexamsave_evt', [
+        $events = $DB->get_records('quizaccess_cdexamcontrol_evt', [
             'attemptid' => $attemptid,
             'timeend' => 0,
         ]);
@@ -293,7 +332,7 @@ class incident_service {
             $event->timeend = $now;
             $event->duration = max(0, $now - (int) $event->timestart);
             $event->timemodified = $now;
-            $DB->update_record('quizaccess_cdexamsave_evt', $event);
+            $DB->update_record('quizaccess_cdexamcontrol_evt', $event);
         }
     }
 
@@ -302,14 +341,16 @@ class incident_service {
      *
      * @param \stdClass $event Incident record.
      * @param \stdClass $attempt Attempt record.
+     * @param string $pagesessionid Browser session UUID.
      * @return void
      */
-    private static function assert_event_ownership(\stdClass $event, \stdClass $attempt): void {
+    private static function assert_event_ownership(\stdClass $event, \stdClass $attempt, string $pagesessionid): void {
         if (
             (int) $event->attemptid !== (int) $attempt->id ||
-            (int) $event->userid !== (int) $attempt->userid
+            (int) $event->userid !== (int) $attempt->userid ||
+            $event->pagesessionid !== $pagesessionid
         ) {
-            throw new \moodle_exception('invalidrequest', 'quizaccess_cdexamsave');
+            throw new \moodle_exception('invalidrequest', 'quizaccess_cdexamcontrol');
         }
     }
 

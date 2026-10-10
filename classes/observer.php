@@ -14,12 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace quizaccess_cdexamsave;
+namespace quizaccess_cdexamcontrol;
 
 /**
  * Quiz event observers.
  *
- * @package    quizaccess_cdexamsave
+ * @package    quizaccess_cdexamcontrol
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -35,14 +35,14 @@ class observer {
 
         $attemptid = (int) $event->objectid;
         $now = time();
-        \quizaccess_cdexamsave\local\incident_service::close_open_incidents($attemptid, $now);
-        $session = $DB->get_record('quizaccess_cdexamsave_sess', ['attemptid' => $attemptid]);
+        \quizaccess_cdexamcontrol\local\incident_service::close_open_incidents($attemptid, $now);
+        $session = $DB->get_record('quizaccess_cdexamctrl_sess', ['attemptid' => $attemptid]);
         if ($session) {
             $session->active = 0;
             $session->focuslost = 0;
             $session->lostsince = 0;
             $session->timemodified = $now;
-            $DB->update_record('quizaccess_cdexamsave_sess', $session);
+            $DB->update_record('quizaccess_cdexamctrl_sess', $session);
         }
     }
 
@@ -56,7 +56,7 @@ class observer {
         global $DB;
 
         $attemptid = (int) $event->objectid;
-        $DB->delete_records('quizaccess_cdexamsave_evt', ['attemptid' => $attemptid]);
-        $DB->delete_records('quizaccess_cdexamsave_sess', ['attemptid' => $attemptid]);
+        $DB->delete_records('quizaccess_cdexamcontrol_evt', ['attemptid' => $attemptid]);
+        $DB->delete_records('quizaccess_cdexamctrl_sess', ['attemptid' => $attemptid]);
     }
 }

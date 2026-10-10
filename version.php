@@ -15,17 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for CD ExamFocus.
+ * Version information for CD Exam Control.
  *
- * @package    quizaccess_cdexamsave
+ * @package    quizaccess_cdexamcontrol
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'quizaccess_cdexamsave';
-$plugin->version = 2026082200;
+$plugin->component = 'quizaccess_cdexamcontrol';
+$plugin->version = 2026101000;
 $plugin->requires = 2024100700; // Moodle 4.5.
-$plugin->maturity = MATURITY_STABLE;
-$plugin->release = '1.0.4';
+$plugin->maturity = MATURITY_BETA;
+$plugin->release = '0.2.0';

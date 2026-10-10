@@ -14,17 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace quizaccess_cdexamsave;
+namespace quizaccess_cdexamcontrol;
 
-use quizaccess_cdexamsave\local\incident_service;
+use quizaccess_cdexamcontrol\local\incident_service;
 
 /**
  * Unit tests for collector input normalisation.
  *
- * @package    quizaccess_cdexamsave
+ * @package    quizaccess_cdexamcontrol
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @coversDefaultClass \quizaccess_cdexamsave\local\incident_service
+ * @coversDefaultClass \quizaccess_cdexamcontrol\local\incident_service
  */
 final class incident_service_test extends \advanced_testcase {
     /**

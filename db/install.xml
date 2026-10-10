@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/quiz/accessrule/cdexamsave/db" VERSION="2026073100" COMMENT="XMLDB file for CD ExamFocus"
+<XMLDB PATH="mod/quiz/accessrule/cdexamcontrol/db" VERSION="2026101000" COMMENT="XMLDB file for CD Exam Control"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../../lib/xmldb/xmldb.xsd">
   <TABLES>
-    <TABLE NAME="quizaccess_cdexamsave" COMMENT="Per-quiz configuration for CD ExamFocus">
+    <TABLE NAME="quizaccess_cdexamcontrol" COMMENT="Per-quiz configuration for CD Exam Control">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
         <FIELD NAME="warnstudent" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
+        <FIELD NAME="requirefullscreen" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
+        <FIELD NAME="blockshortcuts" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="graceperiodms" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1000" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -18,7 +20,7 @@
         <KEY NAME="quiz_fk" TYPE="foreign-unique" FIELDS="quizid" REFTABLE="quiz" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="quizaccess_cdexamsave_evt" COMMENT="Focus-loss incidents captured during quiz attempts">
+    <TABLE NAME="quizaccess_cdexamcontrol_evt" COMMENT="Focus-loss incidents captured during quiz attempts">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -49,7 +51,7 @@
         <INDEX NAME="created_ix" UNIQUE="false" FIELDS="timecreated"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="quizaccess_cdexamsave_sess" COMMENT="Current monitoring state for each quiz attempt">
+    <TABLE NAME="quizaccess_cdexamctrl_sess" COMMENT="Current monitoring state for each quiz attempt">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>

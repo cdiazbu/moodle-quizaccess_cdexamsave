@@ -14,19 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace quizaccess_cdexamsave\external;
+namespace quizaccess_cdexamcontrol\external;
 
 use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
-use quizaccess_cdexamsave\local\report_service;
+use quizaccess_cdexamcontrol\local\report_service;
 
 /**
  * External function that supplies the teacher's live report.
  *
- * @package    quizaccess_cdexamsave
+ * @package    quizaccess_cdexamcontrol
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -62,7 +62,7 @@ class get_live_data extends external_api {
         require_login($course, false, $cm);
         $context = \context_module::instance($cm->id);
         self::validate_context($context);
-        require_capability('quizaccess/cdexamsave:viewreport', $context);
+        require_capability('quizaccess/cdexamcontrol:viewreport', $context);
 
         return report_service::get_live_data($cm, $params['groupid']);
     }

@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * AJAX-enabled external functions for CD ExamFocus.
+ * AJAX-enabled external functions for CD Exam Control.
  *
- * @package    quizaccess_cdexamsave
+ * @package    quizaccess_cdexamcontrol
  * @copyright  2026 Carlos Díaz Bueno
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -25,19 +25,19 @@
 defined('MOODLE_INTERNAL') || die();
 
 $functions = [
-    'quizaccess_cdexamsave_record_signal' => [
-        'classname' => 'quizaccess_cdexamsave\\external\\record_signal',
+    'quizaccess_cdexamcontrol_record_signal' => [
+        'classname' => 'quizaccess_cdexamcontrol\\external\\record_signal',
         'description' => 'Validate and record one browser focus-monitoring signal.',
         'type' => 'write',
         'ajax' => true,
         'loginrequired' => true,
     ],
-    'quizaccess_cdexamsave_get_live_data' => [
-        'classname' => 'quizaccess_cdexamsave\\external\\get_live_data',
+    'quizaccess_cdexamcontrol_get_live_data' => [
+        'classname' => 'quizaccess_cdexamcontrol\\external\\get_live_data',
         'description' => 'Return a group-aware live monitoring snapshot for authorised staff.',
         'type' => 'read',
         'ajax' => true,
         'loginrequired' => true,
-        'capabilities' => 'quizaccess/cdexamsave:viewreport',
+        'capabilities' => 'quizaccess/cdexamcontrol:viewreport',
     ],
 ];

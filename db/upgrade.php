@@ -14,8 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+
 /**
- * Event observers for CD Exam Control.
+ * Upgrade the independent CD Exam Control beta schema.
  *
  * @package    quizaccess_cdexamcontrol
  * @copyright  2026 Carlos Díaz Bueno
@@ -24,20 +25,25 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$observers = [
-    [
-        'eventname' => '\\mod_quiz\\event\\attempt_submitted',
-        'callback' => '\\quizaccess_cdexamcontrol\\observer::attempt_finished',
-        'priority' => 9999,
-    ],
-    [
-        'eventname' => '\\mod_quiz\\event\\attempt_abandoned',
-        'callback' => '\\quizaccess_cdexamcontrol\\observer::attempt_finished',
-        'priority' => 9999,
-    ],
-    [
-        'eventname' => '\\mod_quiz\\event\\attempt_deleted',
-        'callback' => '\\quizaccess_cdexamcontrol\\observer::attempt_deleted',
-        'priority' => 9999,
-    ],
-];
+/**
+ * Add missing beta settings without touching the ExamFocus component.
+ *
+ * @param int $oldversion Installed component version.
+ * @return bool
+ */
+function xmldb_quizaccess_cdexamcontrol_upgrade($oldversion): bool {
+    global $DB;
+
+    if ($oldversion < 2026101000) {
+        $dbman = $DB->get_manager();
+        $table = new xmldb_table('quizaccess_cdexamcontrol');
+        foreach (['requirefullscreen' => 1, 'blockshortcuts' => 0] as $name => $default) {
+            $field = new xmldb_field($name, XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, $default);
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+        upgrade_plugin_savepoint(true, 2026101000, 'quizaccess', 'cdexamcontrol');
+    }
+    return true;
+}
